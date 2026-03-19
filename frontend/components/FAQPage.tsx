@@ -5,88 +5,64 @@ import { Plus, Minus, Search, Mail, MessageCircle } from 'lucide-react';
 
 const faqCategories = [
   {
-    title: "New Students",
+    title: "About YogSamskara",
     questions: [
+      {
+        q: "What is the YogSamskara approach?",
+        a: "YogSamskara focuses on authentic, traditional yoga rooted in the 5 Koshas (Annamaya, Pranamaya, Manomaya, Vijnanamaya, Anandamaya). Our holistic approach balances the physical body, breath, mind, wisdom, and inner joy for true wellness."
+      },
       {
         q: "I am a beginner. Which class should I take?",
-        a: "Welcome! We recommend starting with our 'Hatha for Posture' or 'Lunchtime Reset' classes. These sessions move at a slower pace with detailed instruction on alignment and modifications, making them perfect for building a strong foundation."
+        a: "Welcome! If you're new to the practice or dealing with specific health concerns, we highly recommend starting with our 1:1 Personal Yoga sessions. Alternatively, our Regular Group Classes are open to all levels and offer a structured, supportive environment."
       },
       {
-        q: "What should I wear?",
-        a: "Wear comfortable, breathable clothing that allows you to move freely. Leggings or shorts and a fitted top are ideal so your shirt doesn't fall over your head during inversions. No shoes or socks are needed in the yoga room."
-      },
-      {
-        q: "Do I need to bring my own mat?",
-        a: "For hygiene reasons, we highly recommend bringing your own mat. However, we have high-quality Manduka mats available for rent ($2) or complimentary for Monthly Unlimited members. We also sell mats in our shop."
-      },
-      {
-        q: "How early should I arrive?",
-        a: "Please arrive 10-15 minutes before class starts. This gives you time to check in, change, and set up your mat without rushing. For the respect of the practice, we lock the doors exactly at the start time."
+        q: "How do I book a session?",
+        a: "You can book directly through our website by creating an account and selecting an available time slot on our booking calendar. We offer a complimentary 30-minute consultation to help you get started."
       }
     ]
   },
   {
-    title: "Memberships & Pricing",
+    title: "Memberships & Policies",
     questions: [
       {
-        q: "What are your specific membership options?",
-        a: "We offer three main tiers: a Drop-In Class for $25, a 10 Class Pack for $220 (valid for 6 months), and a Monthly Unlimited Membership for $150/month which includes perks like free mat storage and guest passes."
+        q: "Is there a pause membership option?",
+        a: "No, we do not offer an option to pause or freeze memberships. Maintaining a consistent practice is essential to the YogSamskara methodology, and our plans are structured to encourage ongoing commitment."
       },
       {
-        q: "Can I share my class pack?",
-        a: "Yes! The 10 Class Pack is shareable with a friend or family member. However, our Monthly Unlimited membership is strictly for individual use only."
+        q: "What is your refund policy?",
+        a: "We have a strict no-refund policy for all purchases, including 1:1 sessions, group classes, and family plans. Please ensure you are committed to the practice before completing your purchase."
       },
       {
-        q: "What is your cancellation policy?",
-        a: "Classes must be cancelled at least 4 hours in advance to avoid a late fee. For early morning classes (before 9am), cancellations must be submitted by 9pm the previous evening."
-      },
-      {
-        q: "Can I freeze my membership?",
-        a: "Yes, Monthly Unlimited members can freeze their membership for up to 3 months per year for a nominal administrative fee of $15/month, or free of charge with a doctor's note."
+        q: "How do I cancel or reschedule a booked session?",
+        a: "Booked sessions can be managed through your student dashboard. Please provide adequate notice if you need to reschedule."
       }
     ]
   },
   {
-    title: "Personal Yoga Therapy",
+    title: "Our Offerings",
     questions: [
       {
-        q: "How is Personal Yoga different from private classes?",
-        a: "Personal Yoga at FlowNest is a therapeutic journey. Unlike standard private lessons, these 1:1 sessions evolve week-by-week based on your energy, lifestyle, and specific healing needs—addressing issues like back pain, anxiety, or posture."
+        q: "What is the difference between Regular and Premium Small Group classes?",
+        a: "Regular Group Classes are 60-minute sessions open to a wider community. Premium Small Group classes are 90-minute sessions limited to a maximum of 5 members, allowing for intimate, highly focused guidance."
       },
       {
-        q: "What packages do you offer?",
-        a: "We offer a Discovery Session ($85) to start. For deeper work, we recommend our 'Immersive Journey' (4 sessions/month for $300) or the 'Deep Transformation' package (8 sessions over 2 months for $550)."
+        q: "How does the Family Wellness Plan work?",
+        a: "The Family Wellness Plan is designed to strengthen family bonds and build healthy habits together. It provides shared access to therapeutic practices tailored for all ages, from children to seniors."
       },
       {
-        q: "Do you offer consultations?",
-        a: "Yes, we offer a complimentary 30-minute consultation. It's a no-pressure conversation to discuss your body's needs and see if our therapeutic approach aligns with your goals."
-      }
-    ]
-  },
-  {
-    title: "Family Wellness Plan",
-    questions: [
-      {
-        q: "How does the Family Plan work?",
-        a: "Our Family Plan is designed for up to 5 members. It includes 40 shared private sessions and 10 group class passes per person. It allows you to practice individually or together, sharing the resources as needed."
-      },
-      {
-        q: "Is it suitable for children or seniors?",
-        a: "Absolutely. The plan is perfect for introducing safe, therapeutic practices to children or elders. Our instructors tailor strategies for each family member's unique health background and goals."
-      },
-      {
-        q: "What is the validity of the Family Plan?",
-        a: "The Family Plan is valid for 2 months. We offer flexible top-up and renewal options to ensure it suits your family's pace and busy schedule."
+        q: "What happens in a 1:1 Personal Yoga session?",
+        a: "Personal Yoga is a highly therapeutic journey. These sessions evolve week-by-week based on your wellness questionnaire, energy, and specific healing needs, addressing issues like back pain, posture, or anxiety."
       }
     ]
   }
 ];
 
+
 const FAQPage: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState("New Students");
   const [openQuestion, setOpenQuestion] = useState<string | null>(null);
 
-  const activeQuestions = faqCategories.find(c => c.title === activeCategory)?.questions || [];
+  // Flatten all FAQs into a single array
+  const allFaqs = faqCategories.flatMap(cat => cat.questions);
 
   return (
     <div className="pt-32 pb-20 bg-black min-h-screen text-white">
@@ -112,94 +88,60 @@ const FAQPage: React.FC = () => {
         </motion.p>
       </section>
 
-      <section className="max-w-[1200px] mx-auto px-6 md:px-12">
-        <div className="flex flex-col md:flex-row gap-12">
+      <section className="max-w-[1400px] mx-auto px-6 md:px-12">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start"
+        >
+            {allFaqs.map((item, index) => (
+              <div key={index} className="bg-white/5 rounded-[2rem] shadow-sm border border-white/10 overflow-hidden backdrop-blur-md flex flex-col transition-all">
+                <button
+                  onClick={() => setOpenQuestion(openQuestion === item.q ? null : item.q)}
+                  className="w-full py-6 px-6 md:px-8 flex items-start justify-between text-left group hover:bg-white/5 transition-colors"
+                >
+                  <span className={`text-base md:text-lg font-poppins pr-4 transition-colors ${openQuestion === item.q ? 'text-white' : 'text-stone-300'}`}>
+                    {item.q}
+                  </span>
+                  <span className={`shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 mt-0.5 ${openQuestion === item.q
+                    ? 'bg-white border-white text-stone-900 rotate-180'
+                    : 'border-white/20 text-stone-400 group-hover:border-white group-hover:text-white'
+                    }`}>
+                    {openQuestion === item.q ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                  </span>
+                </button>
 
-          {/* Sidebar / Category Select */}
-          <div className="w-full md:w-1/4">
-            <div className="sticky top-40 bg-white/5 p-6 rounded-3xl shadow-sm border border-white/10 backdrop-blur-md">
-              <h3 className="text-stone-400 font-bold uppercase tracking-widest text-xs mb-6">Categories</h3>
-              <div className="flex flex-col gap-2">
-                {faqCategories.map((cat) => (
-                  <button
-                    key={cat.title}
-                    onClick={() => { setActiveCategory(cat.title); setOpenQuestion(null); }}
-                    className={`text-left py-3 px-4 rounded-xl text-sm transition-all duration-300 ${activeCategory === cat.title
-                      ? 'bg-white text-stone-900 font-medium shadow-md'
-                      : 'text-stone-400 hover:bg-white/10 hover:text-white'
-                      }`}
-                  >
-                    {cat.title}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Questions List */}
-          <div className="w-full md:w-3/4">
-            <motion.div
-              key={activeCategory}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="bg-white/5 rounded-[2rem] shadow-sm border border-white/10 overflow-hidden backdrop-blur-md">
-                {activeQuestions.map((item, index) => (
-                  <div key={index} className="border-b border-white/10 last:border-0">
-                    <button
-                      onClick={() => setOpenQuestion(openQuestion === item.q ? null : item.q)}
-                      className="w-full py-8 px-8 md:px-10 flex items-center justify-between text-left group hover:bg-white/5 transition-colors"
+                <AnimatePresence>
+                  {openQuestion === item.q && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
                     >
-                      <span className={`text-lg md:text-xl font-poppins pr-8 transition-colors ${openQuestion === item.q ? 'text-white' : 'text-stone-300'}`}>
-                        {item.q}
-                      </span>
-                      <span className={`shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${openQuestion === item.q
-                        ? 'bg-white border-white text-stone-900 rotate-180'
-                        : 'border-white/20 text-stone-400 group-hover:border-white group-hover:text-white'
-                        }`}>
-                        {openQuestion === item.q ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-                      </span>
-                    </button>
-
-                    <AnimatePresence>
-                      {openQuestion === item.q && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                          className="overflow-hidden"
-                        >
-                          <div className="px-8 md:px-10 pb-8 pt-0">
-                            <p className="text-stone-400 font-sans font-light leading-relaxed text-base md:text-lg">
-                              {item.a}
-                            </p>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ))}
+                      <div className="px-6 md:px-8 pb-6 pt-0">
+                        <p className="text-stone-400 font-sans font-light leading-relaxed text-sm md:text-base">
+                          {item.a}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </motion.div>
-          </div>
-
-        </div>
+            ))}
+        </motion.div>
       </section>
 
       {/* Still have questions */}
       <section className="max-w-4xl mx-auto px-6 mt-32 text-center">
-        <h3 className="text-2xl font-sans font-light text-white mb-8">Still have questions?</h3>
+        <h3 className="text-2xl font-sans font-light text-white mb-8">Still have questions or facing an issue?</h3>
         <div className="flex flex-col md:flex-row justify-center gap-6">
-          <a href="mailto:support@flownest.com" className="flex items-center justify-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-full hover:bg-white hover:text-stone-900 hover:border-white transition-all group">
-            <Mail className="w-4 h-4 text-stone-400 group-hover:text-stone-900" />
-            <span className="text-sm font-medium text-stone-300 group-hover:text-stone-900">Email Support</span>
+          <a href="https://wa.me/919399441405" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-full hover:bg-green-500 hover:text-white hover:border-green-500 transition-all group">
+            <MessageCircle className="w-5 h-5 text-stone-400 group-hover:text-white" />
+            <span className="text-sm font-medium text-stone-300 group-hover:text-white">Contact us on WhatsApp (+91 93994 41405)</span>
           </a>
-          <button className="flex items-center justify-center gap-3 px-8 py-4 bg-white/5 border border-white/10 rounded-full hover:bg-white hover:text-stone-900 hover:border-white transition-all group">
-            <MessageCircle className="w-4 h-4 text-stone-400 group-hover:text-stone-900" />
-            <span className="text-sm font-medium text-stone-300 group-hover:text-stone-900">Live Chat</span>
-          </button>
         </div>
       </section>
 

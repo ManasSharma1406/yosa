@@ -171,14 +171,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, isMuted, onTog
               className="hidden sm:flex bg-white text-stone-900 rounded-full px-6 py-3 text-base font-semibold hover:bg-stone-200 transition-colors items-center justify-center gap-2 whitespace-nowrap font-poppins"
             >
               <Calendar className="w-4 h-4" />
-              <span>Schedule</span>
+              <span>Begin Today</span>
             </button>
 
             {/* Mute/Unmute Button */}
             <button
               onClick={onToggleMute}
               className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-stone-200 transition-colors shrink-0"
-              aria-label={isMuted ? "Unmute video" : "Mute video"}
+              aria-label={isMuted ? "Unmute music" : "Mute music"}
             >
               {isMuted ? (
                 <VolumeOff className="w-6 h-6 text-stone-900" fill="currentColor" />

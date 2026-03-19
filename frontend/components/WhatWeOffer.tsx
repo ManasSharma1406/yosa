@@ -127,7 +127,7 @@ const WhatWeOffer: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.6 }}
-                    className="px-10 py-5 bg-white/5 backdrop-blur-xl border border-white/20 rounded-full text-xs md:text-sm uppercase tracking-[0.15em] hover:bg-white hover:text-stone-900 transition-all duration-500 flex items-center gap-3 group"
+                    className="px-[42px] py-[21px] bg-white/5 backdrop-blur-xl border border-white/20 rounded-full text-[13px] md:text-[15px] uppercase tracking-[0.15em] hover:bg-white hover:text-stone-900 transition-all duration-500 flex items-center gap-3 group"
                     onClick={() => window.open('https://wa.me/919399441405?text=I\'d%20like%20to%20book%20a%20free%2030-min%20consultation', '_blank')}
                 >
                     Book - 30 Min Free Consultation!

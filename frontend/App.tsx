@@ -17,6 +17,7 @@ import WhatWeOffer from './components/WhatWeOffer';
 import GroupOfferingsPage from './components/GroupOfferingsPage';
 import FamilyPlanPage from './components/FamilyPlanPage';
 import WhatsAppButton from './components/WhatsAppButton';
+import CalendarButton from './components/CalendarButton';
 import SignInPage from './components/auth/SignInPage';
 import SignUpPage from './components/auth/SignUpPage';
 import Dashboard from './components/Dashboard';
@@ -117,13 +118,21 @@ const App: React.FC = () => {
 const AppInner: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showContactPopup, setShowContactPopup] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  
+  // Initialize from localStorage, default to true for autoplay policies
+  const [isMuted, setIsMuted] = useState(() => {
+    const saved = localStorage.getItem('globalAudioMuted');
+    return saved !== null ? saved === 'true' : true;
+  });
+  
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [hidden, setHidden] = useState(false);
   const { scrollY } = useScroll();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const { isScheduleModalOpen, closeBookingModal } = useBooking();
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -164,47 +173,73 @@ const AppInner: React.FC = () => {
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
+    localStorage.setItem('globalAudioMuted', String(newMuted));
+    if (audioRef.current) {
+      audioRef.current.muted = newMuted;
+      if (!newMuted) {
+        audioRef.current.play().catch(() => {});
+      }
+    }
   };
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-
+  // Global audio: play as soon as user first interacts with the page
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
+    const handleFirstInteraction = () => {
+      if (!hasInteracted) {
+        setHasInteracted(true);
+        if (audioRef.current) {
+          audioRef.current.muted = false;
+          setIsMuted(false);
+          audioRef.current.play().catch(() => {
+            // If autoplay fails even after interaction, stay muted
+          });
+        }
+        window.removeEventListener('click', handleFirstInteraction);
+        window.removeEventListener('keydown', handleFirstInteraction);
+        window.removeEventListener('touchstart', handleFirstInteraction);
+      }
+    };
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+    window.addEventListener('touchstart', handleFirstInteraction);
+    return () => {
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+    };
+  }, [hasInteracted]);
+
+  // Sync mute state with audio element
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
     }
   }, [isMuted]);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video && !loading) {
-      // Attempt autoplay with sound
-      video.play().catch(async (error) => {
-        console.warn("Autoplay with sound failed, trying muted", error);
-        // Fallback: Mute and play
-        setIsMuted(true);
-        if (video) {
-          video.muted = true;
-          try {
-            await video.play();
-          } catch (e) {
-            console.error("Muted autoplay also failed", e);
-          }
-        }
-      });
-    }
-  }, [loading]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
 
   const isAuthPage = location.pathname.startsWith('/sign-in') || location.pathname.startsWith('/sign-up');
 
   return (
     <>
-      {!isAuthPage && (
+      {/* Global persistent background audio – plays on ALL pages */}
+      <audio
+        ref={audioRef}
+        src="/hero.mp4"
+        loop
+        muted={isMuted}
+        preload="auto"
+        style={{ display: 'none' }}
+      />
+
+      {location.pathname === '/' && (
         <video
           ref={videoRef}
           autoPlay
-          muted={isMuted}
+          muted={true}
           loop
           playsInline
           preload="metadata"
@@ -226,6 +261,7 @@ const AppInner: React.FC = () => {
         />
 
         <WhatsAppButton />
+        <CalendarButton />
         <ContactPopup isOpen={showContactPopup} onClose={() => setShowContactPopup(false)} />
         <IntakePopup />
 

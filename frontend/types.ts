@@ -28,4 +28,5 @@ export interface Testimonial {
     author: string;
     role?: string;
     image: string;
+    countryCode?: string;
 }

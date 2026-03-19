@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     X, Check, ArrowLeft, User, Users, Home, ChevronRight,
-    Shield, CreditCard, AlertCircle, Loader2, CheckCircle, XCircle
+    Shield, CreditCard, AlertCircle, Loader2, CheckCircle, XCircle, Calendar
 } from 'lucide-react';
-import BookingCalendar from './booking/BookingCalendar';
-import BookingForm from './booking/BookingForm';
-import { auth, db } from '../lib/firebase';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { auth } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ScheduleModalProps {
     isOpen: boolean;
@@ -39,21 +37,17 @@ const ADDONS = [
     { id: 'breathwork', name: 'Breathwork & Nervous System Reset', price: 18 },
 ];
 
-type Step = 'offering' | 'plan' | 'calendar' | 'form' | 'checkout' | 'success' | 'payment_failed';
+type Step = 'offering' | 'plan' | 'checkout' | 'success' | 'payment_failed';
 
 const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialPlan }) => {
     const [step, setStep] = useState<Step>('offering');
     const [selectedOffering, setSelectedOffering] = useState<string | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
-    const [bookingDetails, setBookingDetails] = useState<{ sessionType: string; focusArea: string; intensity: string } | null>(null);
     const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
     const [payLoading, setPayLoading] = useState(false);
     const [failedReason, setFailedReason] = useState('');
-    const [subscription, setSubscription] = useState<any>(null);
-    const [loadingSubscription, setLoadingSubscription] = useState(false);
 
+    const navigate = useNavigate();
     const { getIdToken } = useAuth();
 
     const planPrice = selectedPlan ? (PLAN_PRICE_MAP[selectedPlan] ?? 0) : 0;
@@ -63,10 +57,9 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
     useEffect(() => {
         if (isOpen) {
             document.body.classList.add('modal-open');
-            fetchSubscription();
             if (initialPlan) {
                 setSelectedPlan(initialPlan);
-                setStep('calendar');
+                setStep('checkout');
             } else {
                 setStep('offering');
                 setSelectedPlan(null);
@@ -79,28 +72,6 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
         };
     }, [isOpen, initialPlan]);
 
-    const fetchSubscription = async () => {
-        setLoadingSubscription(true);
-        try {
-            const token = await getIdToken();
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/subscriptions/status`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success && result.data && result.data.status === 'active') {
-                    setSubscription(result.data);
-                } else {
-                    setSubscription(null);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch subscription:', error);
-        } finally {
-            setLoadingSubscription(false);
-        }
-    };
-
     const handleOfferingSelect = (offering: string) => {
         setSelectedOffering(offering);
         setStep('plan');
@@ -108,32 +79,16 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
 
     const handlePlanSelect = (plan: string) => {
         setSelectedPlan(plan);
-        setStep('calendar');
-    };
-
-    const handleSelectSlot = (date: Date, time: string) => {
-        setSelectedDate(date);
-        setSelectedTime(time);
-        if (time) setStep('form');
+        setStep('checkout');
     };
 
     const handleBack = () => {
         if (step === 'plan') setStep('offering');
-        else if (step === 'calendar') {
+        else if (step === 'checkout') {
             if (initialPlan) resetAndClose();
             else setStep('plan');
         }
-        else if (step === 'form') {
-            setStep('calendar');
-            setSelectedTime(null);
-        } else if (step === 'checkout') setStep('form');
         else if (step === 'payment_failed') setStep('checkout');
-    };
-
-    // Called by BookingForm — just collect details, move to checkout
-    const handleFormSuccess = (details: { sessionType: string; focusArea: string; intensity: string }) => {
-        setBookingDetails(details);
-        setStep('checkout');
     };
 
     const toggleAddon = (id: string) => {
@@ -142,52 +97,13 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
         );
     };
 
-    // Confirm booking using existing subscription
-    const handleConfirmWithSubscription = async () => {
-        if (!selectedDate || !selectedTime || !bookingDetails) return;
-        setPayLoading(true);
-        try {
-            const token = await getIdToken();
-            const user = auth.currentUser;
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/bookings/create`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    date: selectedDate.toLocaleDateString(),
-                    time: selectedTime,
-                    userName: user?.displayName || 'User',
-                    userEmail: user?.email || '',
-                    sessionType: bookingDetails.sessionType,
-                    focusArea: bookingDetails.focusArea,
-                    intensity: bookingDetails.intensity,
-                    status: 'confirmed'
-                })
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                setStep('success');
-            } else {
-                throw new Error(result.message || 'Booking failed');
-            }
-        } catch (error: any) {
-            setFailedReason(error.message || 'Failed to confirm booking');
-            setStep('payment_failed');
-        } finally {
-            setPayLoading(false);
-        }
-    };
-
     const handlePay = async () => {
         setPayLoading(true);
         setFailedReason('');
 
         try {
             const user = auth.currentUser;
-            const idToken = user ? await user.getIdToken() : '';
+            const idToken = user ? await getIdToken() : '';
 
             // Create order on backend
             const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/create-order`, {
@@ -212,7 +128,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                 amount: order.amount,
                 currency: order.currency,
                 name: 'FlowNest Studio',
-                description: selectedPlan || 'Yoga Session',
+                description: selectedPlan || 'Yoga Plan',
                 image: '/red.png',
                 order_id: order.id,
                 handler: async function (rzpResponse: any) {
@@ -270,21 +186,23 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
         setStep('offering');
         setSelectedOffering(null);
         setSelectedPlan(null);
-        setSelectedDate(null);
-        setSelectedTime(null);
-        setBookingDetails(null);
         setSelectedAddons([]);
         setPayLoading(false);
         setFailedReason('');
         onClose();
     };
 
+    const handleGoToDashboard = () => {
+        resetAndClose();
+        navigate('/dashboard');
+    };
+
     const getHeaderTitle = () => {
         switch (step) {
-            case 'success': return 'Confirmation';
+            case 'success': return 'Plan Confirmed';
             case 'checkout': return 'Secure Checkout';
             case 'payment_failed': return 'Payment Failed';
-            default: return 'Make an Appointment';
+            default: return 'Select a Plan';
         }
     };
 
@@ -455,51 +373,8 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                         </motion.div>
                                     )}
 
-                                    {/* ── STEP: Calendar ── */}
-                                    {step === 'calendar' && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            className="w-full"
-                                        >
-                                            <div className="flex items-center gap-4 mb-8">
-                                                <button onClick={handleBack} className="p-2 hover:bg-stone-50 rounded-full transition-colors">
-                                                    <ArrowLeft className="w-5 h-5 text-stone-900" />
-                                                </button>
-                                                <div className="font-poppins">
-                                                    <p className="text-stone-500 text-[10px] uppercase tracking-widest font-bold not-italic">Step 3 of 5</p>
-                                                    <h3 className="text-xl font-bold text-slate-900 font-poppins not-italic">Select Date & Time</h3>
-                                                </div>
-                                            </div>
-                                            <BookingCalendar
-                                                onSelectSlot={handleSelectSlot}
-                                                selectedDate={selectedDate}
-                                                selectedTime={selectedTime}
-                                            />
-                                        </motion.div>
-                                    )}
-
-                                    {/* ── STEP: Form ── */}
-                                    {step === 'form' && selectedDate && selectedTime && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            className="w-full"
-                                        >
-                                            <BookingForm
-                                                selectedDate={selectedDate}
-                                                selectedTime={selectedTime}
-                                                onBack={handleBack}
-                                                onSuccess={handleFormSuccess}
-                                                initialSessionType={selectedPlan || ''}
-                                            />
-                                        </motion.div>
-                                    )}
-
                                     {/* ── STEP: Checkout ── */}
-                                    {step === 'checkout' && selectedDate && selectedTime && bookingDetails && (
+                                    {step === 'checkout' && selectedPlan && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 16 }}
                                             animate={{ opacity: 1, y: 0 }}
@@ -525,14 +400,11 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                         <div>
                                                             <p className="font-semibold text-slate-900 text-sm">{selectedPlan}</p>
                                                             <p className="text-stone-400 text-xs mt-0.5">
-                                                                {selectedDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })} · {selectedTime}
-                                                            </p>
-                                                            <p className="text-stone-400 text-xs">
-                                                                {bookingDetails.focusArea} · {bookingDetails.intensity} intensity
+                                                                Plan Subscription
                                                             </p>
                                                         </div>
                                                         <span className="text-lg font-light text-slate-900">
-                                                            {subscription ? 'Plan Active' : `$${planPrice}`}
+                                                            ${planPrice}
                                                         </span>
                                                     </div>
 
@@ -550,9 +422,9 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
 
                                                     {/* Total */}
                                                     <div className="flex justify-between items-center pt-4 border-t border-stone-200 font-bold">
-                                                        <span className="text-slate-900">{subscription ? 'Session Credit' : 'Total to Pay'}</span>
+                                                        <span className="text-slate-900">Total to Pay</span>
                                                         <span className="text-2xl text-slate-900">
-                                                            {subscription ? '1 Session' : `$${totalToPay}`}
+                                                            ${totalToPay}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -597,14 +469,14 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
 
                                                 {/* Pay/Confirm Button */}
                                                 <button
-                                                    onClick={subscription ? handleConfirmWithSubscription : handlePay}
+                                                    onClick={handlePay}
                                                     disabled={payLoading}
                                                     className="w-full py-5 bg-black text-white rounded-2xl font-bold text-base tracking-wide hover:bg-stone-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-xl shadow-stone-200"
                                                 >
                                                     {payLoading ? (
-                                                        <><Loader2 className="w-5 h-5 animate-spin" /> {subscription ? 'Confirming...' : 'Initiating Payment...'}</>
+                                                        <><Loader2 className="w-5 h-5 animate-spin" /> Initiating Payment...</>
                                                     ) : (
-                                                        subscription ? 'Confirm Booking' : `Pay $${totalToPay} Now`
+                                                        `Pay $${totalToPay} Now`
                                                     )}
                                                 </button>
 
@@ -652,65 +524,42 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                     onClick={resetAndClose}
                                                     className="flex-1 py-4 bg-stone-100 text-stone-700 rounded-2xl font-bold hover:bg-stone-200 transition-all"
                                                 >
-                                                    Cancel Booking
+                                                    Cancel Payment
                                                 </button>
                                             </div>
                                         </motion.div>
                                     )}
 
                                     {/* ── STEP: Success ── */}
-                                    {step === 'success' && bookingDetails && selectedDate && (
+                                    {step === 'success' && selectedPlan && (
                                         <motion.div
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             className="relative flex flex-col items-center justify-center py-6"
                                         >
-                                            {/* Congrats Card Floating */}
-                                            <motion.div
-                                                initial={{ y: 20, opacity: 0, rotate: 0 }}
-                                                animate={{ y: 0, opacity: 1, rotate: -22 }}
-                                                style={{ left: '67px', top: '-15px' }}
-                                                className="absolute bg-white rounded-2xl shadow-xl p-6 border border-stone-200 z-10 w-48 hidden md:block"
-                                            >
-                                                <div className="flex justify-center mb-4">
-                                                    <div className="w-12 h-12 bg-stone-50 rounded-lg flex items-center justify-center">
-                                                        <Check className="w-6 h-6 text-black" />
-                                                    </div>
-                                                </div>
-                                                <h4 className="text-center font-semibold text-slate-800 mb-1 font-poppins not-italic">Congrats</h4>
-                                                <p className="text-center text-[10px] text-slate-400 leading-tight">You have an Appointment</p>
-                                                <div className="mt-4 space-y-2">
-                                                    <div className="h-1.5 w-full bg-stone-100 rounded-full" />
-                                                    <div className="h-1.5 w-2/3 bg-stone-100 rounded-full" />
-                                                </div>
-                                            </motion.div>
-
                                             <div className="w-full max-w-2xl bg-white border-4 border-black rounded-[2rem] p-10 relative overflow-hidden">
                                                 <div className="text-center mb-10">
-                                                    <h3 className="text-3xl font-semibold text-slate-900 mb-4 font-poppins not-italic">Appointment Confirmed!</h3>
-                                                    <p className="text-slate-500 text-sm">We've scheduled your session and sent a confirmation email.</p>
+                                                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                        <Check className="w-8 h-8 text-green-500" />
+                                                    </div>
+                                                    <h3 className="text-3xl font-semibold text-slate-900 mb-4 font-poppins not-italic">Plan Purchased Successfully!</h3>
+                                                    <p className="text-slate-500 text-sm">Your payment for <strong>{selectedPlan}</strong> was successful.</p>
                                                 </div>
 
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                                                        <p className="text-xs font-semibold text-stone-900 uppercase tracking-widest mb-3">Date & Time</p>
-                                                        <p className="text-lg font-semibold text-slate-800">
-                                                            {selectedDate.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-                                                        </p>
-                                                        <p className="text-md text-slate-600 mt-1">{selectedTime}</p>
-                                                    </div>
-                                                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-right">
-                                                        <p className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-3 text-right">Session Details</p>
-                                                        <p className="text-lg font-semibold text-slate-800">{bookingDetails.sessionType}</p>
-                                                        <p className="text-slate-600 text-sm mt-1">{bookingDetails.focusArea} • {bookingDetails.intensity}</p>
-                                                    </div>
+                                                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8 text-center">
+                                                    <p className="text-slate-700 font-medium mb-2 font-poppins text-lg">
+                                                        Ready to schedule your classes?
+                                                    </p>
+                                                    <p className="text-slate-500 text-sm">
+                                                        Head over to your Dashboard to pick the dates and times that work best for you.
+                                                    </p>
                                                 </div>
 
                                                 <button
-                                                    onClick={resetAndClose}
-                                                    className="w-full bg-black text-white rounded-2xl py-4 font-bold text-lg hover:bg-stone-900 transition-all shadow-xl shadow-stone-200"
+                                                    onClick={handleGoToDashboard}
+                                                    className="w-full bg-black text-white rounded-2xl py-4 font-bold text-lg hover:bg-stone-900 transition-all shadow-xl shadow-stone-200 flex items-center justify-center gap-3"
                                                 >
-                                                    Done
+                                                    <Calendar className="w-5 h-5" /> Go to Dashboard
                                                 </button>
                                             </div>
                                         </motion.div>
@@ -725,6 +574,5 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
         </AnimatePresence>
     );
 };
-
 
 export default ScheduleModal;

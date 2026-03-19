@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Calendar, Clock, User, Mail, Shield, Settings, LogOut, Key, Eye, EyeOff, CheckCircle, Lock, CreditCard, Receipt, ExternalLink, Play, Video, Sparkles, FileText, Heart, Info, ChevronRight, Save, Camera, X, History } from 'lucide-react';
+import { Activity, Calendar, Clock, User, Mail, Shield, Settings, LogOut, Key, Eye, EyeOff, CheckCircle, Lock, CreditCard, Receipt, ExternalLink, Play, Video, Sparkles, FileText, Heart, Info, ChevronRight, Save, Camera, X, History, ArrowRight } from 'lucide-react';
 import { useBooking } from '../context/BookingContext';
 import { storage } from '../lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import BookingCalendar from './booking/BookingCalendar';
+import { Calendar as CalendarIcon, Phone } from 'lucide-react';
 
 declare global {
     interface Window {
@@ -24,7 +26,8 @@ const Dashboard: React.FC = () => {
     const vantaRef = useRef(null);
 
     useEffect(() => {
-        if (!vantaEffect && window.VANTA) {
+        // Only initialize heavy WebGL effect on desktop/tablet to save mobile battery
+        if (!vantaEffect && window.VANTA && window.innerWidth > 768) {
             setVantaEffect(window.VANTA.FOG({
                 el: vantaRef.current,
                 mouseControls: false,
@@ -106,6 +109,13 @@ const Dashboard: React.FC = () => {
     const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
     const [loadingPaymentHistory, setLoadingPaymentHistory] = useState(true);
     const [imgError, setImgError] = useState(false);
+
+    // Embedded Calendar State
+    const [selectedSlots, setSelectedSlots] = useState<{date: Date, time: string}[]>([]);
+    const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
+    const [isBookingSubmitting, setIsBookingSubmitting] = useState(false);
+    const [bookingSuccessMode, setBookingSuccessMode] = useState(false);
+    const [bookingError, setBookingError] = useState('');
 
     const isAdmin = !!localStorage.getItem('adminToken');
 
@@ -345,7 +355,8 @@ const Dashboard: React.FC = () => {
     const formattedFirstName = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() : '';
 
     const now = new Date();
-    const upcomingSessions = sessions.filter(s => new Date(s.date) >= now);
+    const upcomingSessions = sessions.filter(s => s.status === 'confirmed');
+    const completedSessions = sessions.filter(s => s.status === 'completed');
     const pastSessions = sessions.filter(s => new Date(s.date) < now).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const privateSessions = upcomingSessions.filter(s => !s.sessionType?.toLowerCase().includes('group'));
@@ -439,7 +450,101 @@ const Dashboard: React.FC = () => {
         }
     };
 
-    const hasActivePlan = subscription.status === 'active' && subscription.sessionsUsed < subscription.totalSessions && (!subscription.expiryDate || new Date(subscription.expiryDate) >= new Date());
+    const hasActivePlan = subscription?.status === 'active' && subscription?.sessionsUsed < subscription?.totalSessions && (!subscription.expiryDate || new Date(subscription.expiryDate) >= new Date());
+    
+    // Calculate max selections based on subscription if active, else 0 or 1 for individual purchase flow
+    const availableSessions = hasActivePlan ? (subscription.totalSessions - subscription.sessionsUsed) : 0;
+    
+    // Assuming for now that if they don't have an active plan, they can't book directly here OR they can only select 1 and be redirected to buy
+    const maxSelections = hasActivePlan ? availableSessions : 1;
+    
+    const handleConfirmBookingClick = () => {
+        if (!hasActivePlan) {
+            // Redirect to purchase plan if no active plan
+            // The modal can handle this or we can redirect to a specific page
+            openBookingModal(); 
+            return;
+        }
+        setIsBookingDetailsOpen(true);
+    };
+
+    const handleBulkBookingSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsBookingSubmitting(true);
+        setBookingError('');
+        
+        try {
+            const token = await getIdToken();
+            const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            
+             // Create bookings array from selected slots
+             const bookingsData = selectedSlots.map(slot => {
+                 // Format the date carefully for standard processing
+                 const date = new Date(slot.date);
+                 date.setHours(12,0,0,0);
+                 
+                return {
+                    userId: user.uid,
+                    sessionType: 'Private 1:1 Session', 
+                    date: date.toISOString(),
+                    time: slot.time,
+                    duration: 60, 
+                    price: 0, 
+                    addons: []
+                };
+             });
+
+            const response = await fetch(`${API}/api/bookings/bulk-create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ bookings: bookingsData })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    setBookingSuccessMode(true);
+                    setSelectedSlots([]); // cleared
+                    
+                    // Refresh sessions to show the new ones immediately
+                    const responseSessions = await fetch(`${API}/api/bookings/user/${user.email}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                     if (responseSessions.ok) {
+                         const sessResult = await responseSessions.json();
+                         setSessions(sessResult.data || []);
+                     }
+                     // Refresh subscription to show updated session usage immediately
+                     const responseSub = await fetch(`${API}/api/subscriptions/status`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                     if (responseSub.ok) {
+                         const subResult = await responseSub.json();
+                         setSubscription(subResult.data);
+                     }
+                } else {
+                     setBookingError(result.message || 'Failed to confirm bookings.');
+                }
+            } else {
+                 const err = await response.json();
+                 setBookingError(err.message || 'Failed to connect to server.');
+            }
+        } catch (error: any) {
+            console.error('Bulk booking error:', error);
+            setBookingError(error.message || 'An unexpected error occurred.');
+        } finally {
+            setIsBookingSubmitting(false);
+        }
+    };
+    
+    // For when success modal is closed
+    const handleCloseSuccess = () => {
+         setBookingSuccessMode(false);
+         setIsBookingDetailsOpen(false);
+    };
 
     return (
         <div className="relative min-h-screen text-white font-sans bg-[#0B0B0D]">
@@ -541,6 +646,239 @@ const Dashboard: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Plan Expiry / Upgrade Banner */}
+                            {(() => {
+                                const expiryDate = subscription?.expiryDate ? new Date(subscription.expiryDate) : null;
+                                const daysLeft = expiryDate ? Math.ceil((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+                                const isExpiringSoon = daysLeft !== null && daysLeft <= 7 && daysLeft > 0 && subscription?.status === 'active';
+                                const isExpiredOrEmpty = subscription?.status !== 'active' || availableSessions <= 0;
+
+                                if (isExpiringSoon) return (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-amber-500/10 border border-amber-500/30 text-amber-100 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-2xl">⏳</span>
+                                            <div>
+                                                <p className="font-bold text-sm">Your plan expires in <strong className="text-amber-300">{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong></p>
+                                                <p className="text-xs opacity-75 mt-0.5">Renew now to avoid any break in your practice.</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => openBookingModal()} className="shrink-0 px-5 py-2.5 bg-amber-400 text-black rounded-full text-xs font-bold uppercase tracking-widest hover:bg-amber-300 transition-colors whitespace-nowrap">
+                                            Renew Plan →
+                                        </button>
+                                    </motion.div>
+                                );
+
+                                if (isExpiredOrEmpty && subscription?.planName !== 'Free') return (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-rose-500/10 border border-rose-500/30 text-rose-100 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-2xl">🔒</span>
+                                            <div>
+                                                <p className="font-bold text-sm">Your plan has ended or sessions are exhausted</p>
+                                                <p className="text-xs opacity-75 mt-0.5">Upgrade or renew to keep booking live classes.</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => openBookingModal()} className="shrink-0 px-5 py-2.5 bg-white text-black rounded-full text-xs font-bold uppercase tracking-widest hover:bg-stone-200 transition-colors whitespace-nowrap">
+                                            Upgrade Plan →
+                                        </button>
+                                    </motion.div>
+                                );
+
+                                return null;
+                            })()}
+
+                            {/* SCHEDULE & CALENDAR SECTION */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+                                {/* Interactive Booking Calendar */}
+                                <div className="lg:col-span-12 gradient-border-card bg-white/5 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-2xl relative overflow-hidden group transition-all duration-500">
+                                    <div className="flex items-center justify-between mb-8 relative z-10">
+                                        <h4 className="text-sm uppercase tracking-[0.2em] text-stone-400 font-bold font-poppins not-italic flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-indigo-400" /> Book Your Next Session(s)
+                                        </h4>
+                                        <button 
+                                            onClick={() => openBookingModal()}
+                                            className="text-xs uppercase tracking-widest font-bold text-white/50 hover:text-white transition-colors flex items-center gap-2"
+                                        >
+                                            Buy Plan <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    
+                                    {hasActivePlan && availableSessions <= 0 && (
+                                         <div className="bg-red-500/10 border border-red-500/20 text-red-100 p-6 rounded-2xl mb-8 flex items-center justify-between">
+                                            <div>
+                                                <h5 className="font-bold text-lg mb-1">Session Limit Reached</h5>
+                                                <p className="text-sm opacity-80">You have used all {subscription.totalSessions} sessions in your current plan. Please renew or buy a new plan to continue booking.</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => openBookingModal()}
+                                                className="px-6 py-3 bg-white text-black rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap"
+                                            >
+                                                Renew Now
+                                            </button>
+                                         </div>
+                                    )}
+
+                                    {!hasActivePlan && (
+                                        <div className="bg-stone-800/50 border border-white/10 text-stone-200 p-6 rounded-2xl mb-8 flex items-center justify-between">
+                                            <div>
+                                                <h5 className="font-bold text-lg mb-1">No Active Membership</h5>
+                                                <p className="text-sm opacity-80">You need an active membership plan to book sessions directly from your dashboard.</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => openBookingModal()}
+                                                className="px-6 py-3 bg-white text-black rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap"
+                                            >
+                                                View Plans
+                                            </button>
+                                         </div>
+                                    )}
+                                    {/* Interactive Booking Calendar */}
+                                    <div className="mb-1 relative group">
+                                        <div className="absolute inset-0 bg-indigo-500/5 rounded-[3rem] blur-xl transition-all duration-500 group-hover:bg-indigo-500/10" />
+
+                                        <div className={`bg-[#16161a] border border-white/10 rounded-[3rem] p-6 lg:p-10 relative z-10 shadow-2xl transition-opacity ${(!hasActivePlan || availableSessions <= 0) ? 'opacity-50 pointer-events-none' : ''}`}>
+                                            
+                                            {/* Combined Action Banner Header */}
+                                            <div className="mb-10 flex flex-col lg:flex-row items-center justify-between p-6 bg-white/5 border border-white/10 rounded-[2rem] gap-6 transition-all">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="w-14 h-14 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 flex-shrink-0">
+                                                        <Calendar className="w-7 h-7 text-indigo-400 animate-pulse" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-2xl lg:text-3xl font-poppins text-white mb-1">Book your next sessions</h3>
+                                                        <p className="text-white/40 text-sm font-medium">Select up to <strong className="text-indigo-400">{maxSelections}</strong> time slots from the calendar below.</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={handleConfirmBookingClick}
+                                                    disabled={selectedSlots.length === 0 || isBookingSubmitting}
+                                                    className="px-8 py-4 bg-indigo-600 text-white rounded-full font-bold uppercase tracking-[0.2em] text-sm hover:bg-indigo-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none flex items-center gap-3 whitespace-nowrap w-full lg:w-auto justify-center"
+                                                >
+                                                    {isBookingSubmitting ? (
+                                                        <>Booking...</>
+                                                    ) : (
+                                                        <>
+                                                            Confirm Selection <ArrowRight className="w-5 h-5" />
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </div>
+
+                                            <BookingCalendar
+                                                onSelectSlot={(slots) => setSelectedSlots(slots)}
+                                                selectedSlots={selectedSlots}
+                                                maxSelections={maxSelections}
+                                                darkMode={true}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                    
+                                     {/* Booking Details Modal Sub-Flow */}
+                                     {isBookingDetailsOpen && (
+                                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 pb-20 sm:pb-6">
+                                             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsBookingDetailsOpen(false)} />
+                                             <motion.div
+                                                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                                 animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                 className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                                             >
+                                                {!bookingSuccessMode ? (
+                                                    <div className="flex-1 overflow-y-auto">
+                                                        <div className="bg-stone-50 p-6 sm:p-8 border-b border-stone-200 flex justify-between items-center sticky top-0 z-10">
+                                                            <div>
+                                                                <h2 className="text-2xl font-serif italic text-slate-800">Confirm Your Bookings</h2>
+                                                                <p className="text-stone-500 text-sm mt-1">You are about to book {selectedSlots.length} session{selectedSlots.length > 1 ? 's' : ''}.</p>
+                                                            </div>
+                                                            <button onClick={() => setIsBookingDetailsOpen(false)} className="p-2 rounded-full hover:bg-stone-200 text-stone-500 transition-colors">
+                                                                <X className="w-6 h-6" />
+                                                            </button>
+                                                        </div>
+                                                        <div className="p-6 sm:p-8">
+                                                            <div className="bg-indigo-50 rounded-xl border border-indigo-100 p-5 mb-8">
+                                                                <div className="flex items-start gap-4">
+                                                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                                                        <Info className="w-5 h-5 text-indigo-600" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h4 className="text-sm font-bold text-indigo-900 mb-1 leading-tight">Booking Summary</h4>
+                                                                        <p className="text-sm text-indigo-700">
+                                                                            These sessions will be deducted from your active <strong className="font-bold">{subscription.planName}</strong> plan.
+                                                                            You currently have <strong className="font-bold">{availableSessions}</strong> sessions remaining.
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <h3 className="text-slate-800 font-semibold mb-4 text-sm tracking-wide uppercase">Selected Dates & Times</h3>
+                                                            <div className="space-y-3 mb-8 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar-black">
+                                                                {selectedSlots.map((slot, index) => (
+                                                                    <div key={index} className="flex items-center justify-between p-4 bg-stone-50 rounded-xl border border-stone-200">
+                                                                        <div className="flex items-center gap-4">
+                                                                            <span className="w-8 h-8 rounded-full bg-white border border-stone-200 flex items-center justify-center text-xs font-bold text-stone-500 shrink-0">
+                                                                                {index + 1}
+                                                                            </span>
+                                                                            <span className="font-medium text-slate-800 font-serif text-lg">
+                                                                                {slot.date.toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' })}
+                                                                            </span>
+                                                                        </div>
+                                                                        <span className="px-3 py-1.5 bg-black text-white text-xs font-bold tracking-widest rounded-lg">
+                                                                            {slot.time}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+
+                                                            {bookingError && (
+                                                                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium mb-6 border border-red-100 flex items-start gap-3">
+                                                                    <Info className="w-5 h-5 shrink-0 mt-0.5" />
+                                                                    {bookingError}
+                                                                </div>
+                                                            )}
+
+                                                            <button 
+                                                                onClick={handleBulkBookingSubmit}
+                                                                disabled={isBookingSubmitting}
+                                                                className="w-full bg-black text-white py-5 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-stone-800 transition-colors shadow-lg disabled:opacity-70 flex justify-center items-center gap-2"
+                                                            >
+                                                                {isBookingSubmitting ? (
+                                                                    <>Processing {selectedSlots.length} Bookings...</>
+                                                                ) : (
+                                                                    <>Confirm & Book {selectedSlots.length} Sessions</>
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+                                                         <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                                                            <CheckCircle className="w-12 h-12 text-green-500" />
+                                                        </div>
+                                                        <h2 className="text-3xl font-serif italic text-slate-900 mb-2">Bookings Confirmed!</h2>
+                                                        <p className="text-stone-500 mb-8 max-w-sm mx-auto">
+                                                            You have successfully scheduled <strong className="text-slate-800 font-bold">{selectedSlots.length} session{selectedSlots.length > 1 ? 's' : ''}</strong>. 
+                                                            Your session calendar has been updated.
+                                                        </p>
+                                                        <button 
+                                                            onClick={handleCloseSuccess}
+                                                            className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-stone-800 transition-colors"
+                                                        >
+                                                            Back to Dashboard
+                                                        </button>
+                                                    </div>
+                                                )}
+                                             </motion.div>
+                                         </div>
+                                     )}
+                                </div>
+
                             {/* Main Grid: Left (Package) | Right (Logs) */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
@@ -576,15 +914,19 @@ const Dashboard: React.FC = () => {
                                         <div className="grid grid-cols-2 gap-y-8 gap-x-4 relative z-10">
                                             <div>
                                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Total Sessions</p>
-                                                <p className="text-xl font-medium text-white tracking-wide">{subscription.totalSessions} Hours</p>
+                                                <p className="text-xl font-medium text-white tracking-wide">{subscription.totalSessions}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Sessions Used</p>
-                                                <p className="text-xl font-medium text-white tracking-wide">{subscription.sessionsUsed} Hours</p>
+                                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Completed Classes</p>
+                                                <p className="text-xl font-medium text-white tracking-wide">{completedSessions.length}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Remaining</p>
-                                                <p className="text-lg font-medium text-stone-300 tracking-wide">{Math.max(0, subscription.totalSessions - subscription.sessionsUsed)} Hours</p>
+                                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Booked / Upcoming</p>
+                                                <p className="text-lg font-medium text-stone-300 tracking-wide">{subscription.sessionsUsed - completedSessions.length}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Remaining to Book</p>
+                                                <p className="text-lg font-medium text-stone-300 tracking-wide">{Math.max(0, subscription.totalSessions - subscription.sessionsUsed)}</p>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Expiration</p>
@@ -605,8 +947,8 @@ const Dashboard: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="relative z-10">
-                                                <p className="text-5xl font-light text-white tracking-tight mb-2 drop-shadow-sm">{subscription.sessionsUsed}<span className="text-xl text-stone-500 font-medium ml-1">hr</span></p>
-                                                <p className="text-[10px] text-stone-400 uppercase tracking-[0.2em] font-bold mt-1">Sessions Used</p>
+                                                <p className="text-5xl font-light text-white tracking-tight mb-2 drop-shadow-sm">{completedSessions.length}</p>
+                                                <p className="text-[10px] text-stone-400 uppercase tracking-[0.2em] font-bold mt-1">Completed Classes</p>
                                             </div>
                                         </div>
 
@@ -618,8 +960,8 @@ const Dashboard: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="relative z-10">
-                                                <p className="text-5xl font-light text-white tracking-tight mb-2 drop-shadow-sm">{Math.max(0, subscription.totalSessions - subscription.sessionsUsed)}<span className="text-xl text-stone-500 font-medium ml-1">hr</span></p>
-                                                <p className="text-[10px] text-stone-400 uppercase tracking-[0.2em] font-bold mt-1">Sessions Remaining</p>
+                                                <p className="text-5xl font-light text-white tracking-tight mb-2 drop-shadow-sm">{Math.max(0, subscription.totalSessions - subscription.sessionsUsed)}</p>
+                                                <p className="text-[10px] text-stone-400 uppercase tracking-[0.2em] font-bold mt-1">Available to Book</p>
                                             </div>
                                         </div>
                                     </div>
@@ -755,38 +1097,7 @@ const Dashboard: React.FC = () => {
                                             </div>
                                         )}
 
-                                        {/* Number of hours used (Usage Metrics) */}
-                                        {/* Pushed to the bottom of the card beautifully */}
-                                        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-6">
-                                            <div>
-                                                <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-bold mb-1.5">Usage Metrics</p>
-                                                <h4 className="text-lg font-medium text-stone-200 tracking-wide">Number of hours used</h4>
-                                            </div>
 
-                                            <div className="flex items-center gap-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent p-3 pr-6 rounded-[2rem] border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.15)] relative overflow-hidden group hover:shadow-[0_0_40px_rgba(16,185,129,0.25)] transition-all duration-500">
-                                                <div className="absolute inset-0 bg-emerald-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                                                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                                                    <svg className="w-full h-full transform -rotate-90 filter drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]">
-                                                        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(16,185,129,0.15)" strokeWidth="4" />
-                                                        <circle
-                                                            cx="32" cy="32" r="26" fill="none" stroke="#10b981" strokeWidth="4"
-                                                            strokeDasharray="163" strokeDashoffset={163 - (subscription.totalSessions > 0 ? (subscription.sessionsUsed / subscription.totalSessions) * 163 : 0)} strokeLinecap="round"
-                                                            className="transition-all duration-1000 ease-out"
-                                                        />
-                                                    </svg>
-                                                    <div className="absolute inset-0 flex items-center justify-center flex-col pt-0.5 z-10">
-                                                        <span className="text-white text-base font-bold leading-none tracking-tight">{subscription.sessionsUsed}</span>
-                                                        <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-0.5 leading-none">/ {subscription.totalSessions}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="relative z-10">
-                                                    <p className="text-xs text-emerald-400 font-bold uppercase tracking-[0.2em] mb-1 flex items-center gap-1.5 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]">
-                                                        <Sparkles className="w-3.5 h-3.5" /> {subscription.sessionsUsed >= subscription.totalSessions && subscription.totalSessions > 0 ? 'Target Reached' : 'Current Progress'}
-                                                    </p>
-                                                    <p className="text-[11px] text-stone-400 font-medium tracking-wide">Keep growing!</p>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>

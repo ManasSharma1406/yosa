@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { Mail, Lock, User, Chrome } from 'lucide-react';
+import { getAuthErrorMessage } from '../../utils/errorMapping';
 
 const SignUpPage: React.FC = () => {
     const [name, setName] = useState('');
@@ -42,7 +43,7 @@ const SignUpPage: React.FC = () => {
 
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Failed to create account');
+            setError(getAuthErrorMessage(err.code || err.message));
         } finally {
             setLoading(false);
         }
@@ -57,7 +58,7 @@ const SignUpPage: React.FC = () => {
             await signInWithPopup(auth, provider);
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Failed to sign up with Google');
+            setError(getAuthErrorMessage(err.code || err.message));
         } finally {
             setLoading(false);
         }
@@ -102,6 +103,8 @@ const SignUpPage: React.FC = () => {
                                     <User className="w-4 h-4 text-stone-500" />
                                     <input
                                         type="text"
+                                        autoComplete="name"
+                                        maxLength={50}
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="Your Name"
@@ -117,8 +120,10 @@ const SignUpPage: React.FC = () => {
                                     <Mail className="w-4 h-4 text-stone-500" />
                                     <input
                                         type="email"
+                                        autoComplete="email"
+                                        maxLength={100}
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => setEmail(e.target.value.trim())}
                                         placeholder="your@email.com"
                                         required
                                         className="bg-transparent outline-none text-white placeholder-stone-600 flex-1 text-sm"
@@ -134,6 +139,8 @@ const SignUpPage: React.FC = () => {
                                     <Lock className="w-4 h-4 text-stone-500" />
                                     <input
                                         type="password"
+                                        autoComplete="new-password"
+                                        maxLength={128}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
@@ -150,6 +157,8 @@ const SignUpPage: React.FC = () => {
                                     <Lock className="w-4 h-4 text-stone-500" />
                                     <input
                                         type="password"
+                                        autoComplete="new-password"
+                                        maxLength={128}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         placeholder="••••••••"

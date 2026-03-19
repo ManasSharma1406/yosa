@@ -38,7 +38,7 @@ const GroupOfferingsPage: React.FC = () => {
                 <div className="relative rounded-[3rem] overflow-hidden h-[60vh] md:h-[80vh] w-full border border-white/10">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="/group offerings page.png"
+                            src="/group offerings page.jpg"
                             alt="Group Offerings Background"
                             loading="lazy"
                             className="w-full h-full object-cover opacity-70"
@@ -113,6 +113,10 @@ const GroupOfferingsPage: React.FC = () => {
                 <div className="text-center mb-14">
                     <h2 className="text-4xl md:text-5xl font-light text-white mb-3">Regular Group Classes</h2>
                     <p className="text-stone-400 text-sm uppercase tracking-widest">Open to all levels</p>
+                    <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+                        <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2" /><path strokeLinecap="round" d="M12 6v6l4 2" strokeWidth="2" /></svg>
+                        <span className="text-indigo-300 text-xs font-semibold tracking-wide">60-minute sessions</span>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto items-start">
@@ -189,7 +193,11 @@ const GroupOfferingsPage: React.FC = () => {
             <section className="max-w-[1400px] mx-auto px-6 md:px-12 mb-20">
                 <div className="text-center mb-14">
                     <h2 className="text-4xl md:text-5xl font-light text-white mb-3">Premium Small Group</h2>
-                    <p className="text-stone-400 text-sm uppercase tracking-widest">Maximum 5 Members · Intimate & Focused</p>
+                    <p className="text-stone-400 text-sm uppercase tracking-widest">Maximum 5 Members · Intimate &amp; Focused</p>
+                    <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full">
+                        <svg className="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2" /><path strokeLinecap="round" d="M12 6v6l4 2" strokeWidth="2" /></svg>
+                        <span className="text-purple-300 text-xs font-semibold tracking-wide">90-minute sessions</span>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto items-start">
@@ -263,10 +271,10 @@ const GroupOfferingsPage: React.FC = () => {
                 <p className="text-stone-400 mb-8 max-w-xl mx-auto text-lg">Find your class, reserve your spot, and show up for yourself — consistently.</p>
                 <p className="text-stone-500 text-sm mb-12">For bookings and consultations, please contact Yoga Samskara directly.</p>
                 <div className="flex flex-col md:flex-row justify-center gap-6">
-                    <button className="px-8 py-4 bg-white text-black rounded-full font-bold uppercase tracking-widest text-xs hover:bg-stone-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-                        View Schedule
-                    </button>
-                    <button className="px-8 py-4 border border-white/30 text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all">
+                    <button
+                        onClick={() => window.open('https://wa.me/919399441405?text=I\'d%20like%20to%20inquire%20about%20group%20classes', '_blank')}
+                        className="px-8 py-4 border border-white/30 text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all"
+                    >
                         Contact Us
                     </button>
                 </div>

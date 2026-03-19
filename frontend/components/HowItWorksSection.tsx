@@ -1,88 +1,141 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-
-
+import { ShoppingBag, CalendarDays, Video, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const steps = [
   {
-    title: "Body",
-    image: "/assets/Cards Images/Mind (2).png"
+    number: '01',
+    icon: ShoppingBag,
+    title: 'Choose Your Plan',
+    description: 'Browse our Personal, Group, or Family wellness plans and select the one that fits your goals and budget. Each plan comes with a set number of live session credits.',
+    cta: 'View Plans',
+    link: '/personal-yoga',
+    color: 'from-violet-500/20 to-indigo-500/20',
+    border: 'border-violet-500/30',
+    iconColor: 'text-violet-300',
   },
   {
-    title: "Mind",
-    image: "/assets/Cards Images/Mind (4).png"
+    number: '02',
+    icon: CalendarDays,
+    title: 'Book Your Sessions',
+    description: 'Once your plan is active, log in to your dashboard and pick your preferred dates & times from the calendar. Book multiple sessions at once, schedule around your life.',
+    cta: 'Go to Dashboard',
+    link: '/dashboard',
+    color: 'from-emerald-500/20 to-teal-500/20',
+    border: 'border-emerald-500/30',
+    iconColor: 'text-emerald-300',
   },
   {
-    title: "Breath",
-    image: "/assets/Cards Images/Mind (3).png"
+    number: '03',
+    icon: Video,
+    title: 'Join the Live Class',
+    description: 'At your scheduled time, click the Google Meet link sent to your email. Practice live with your instructor, ask questions, and track your progress class by class.',
+    cta: 'Learn More',
+    link: '/instructor',
+    color: 'from-rose-500/20 to-pink-500/20',
+    border: 'border-rose-500/30',
+    iconColor: 'text-rose-300',
   },
-  {
-    title: "Soul",
-    image: "/assets/Cards Images/Mind (6).png"
-  },
-  {
-    title: "Wisdom",
-    image: "/assets/Cards Images/Mind (5).png"
-  }
+];
+
+const galleryImages = [
+  '/assets/Cards Images/Mind (2).png',
+  '/assets/Cards Images/Mind (4).png',
+  '/assets/Cards Images/Mind (3).png',
+  '/assets/Cards Images/Mind (6).png',
+  '/assets/Cards Images/Mind (5).png',
 ];
 
 const HowItWorksSection: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <section className="relative py-12 bg-black overflow-hidden perspective-distant">
-      {/* Starfield CSS Background */}
-      <div className="absolute inset-0 z-0" style={{
-        background: 'radial-gradient(ellipse at center, #111 0%, #000 100%)'
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `
-            radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
-            radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
-            radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
-            radial-gradient(1px 1px at 75% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
-            radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
-            radial-gradient(1px 1px at 20% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
-            radial-gradient(1px 1px at 65% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
-            radial-gradient(1.5px 1.5px at 45% 35%, rgba(255,255,255,0.8) 0%, transparent 100%),
-            radial-gradient(1px 1px at 85% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
-            radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.3) 0%, transparent 100%)
-          `
-        }} />
-      </div>
+    <section className="relative py-24 bg-black overflow-hidden">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
 
-
-      <div className="relative z-10 max-w-[1700px] mx-auto px-6 md:px-12">
-
-        <div className="flex justify-center w-full mb-10">
+        {/* Heading */}
+        <div className="text-center mb-20">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-xs uppercase tracking-[0.3em] text-stone-500 mb-4 font-bold"
+          >
+            How It Works
+          </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="inline-block px-8 py-3 bg-black rounded-full border border-white/10 text-sm md:text-base font-sans tracking-[0.2em] uppercase text-center text-white shadow-lg"
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-6xl font-serif italic text-white leading-tight"
           >
-            How It Works
+            Start your journey in <span className="text-stone-400">3 steps</span>
           </motion.h2>
         </div>
 
-        {/* Responsive Grid Layout - Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          {steps.map((step) => (
-            <div
-              key={step.title}
-              className="relative w-full aspect-[9/16] group"
-            >
-              <div
-                className="absolute inset-0 rounded-3xl overflow-hidden border border-white/20 shadow-lg"
+        {/* Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+          {steps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+                className={`relative bg-gradient-to-br ${step.color} border ${step.border} rounded-[2rem] p-8 md:p-10 backdrop-blur-xl overflow-hidden transition-transform duration-300`}
               >
-                <img
-                  src={step.image}
-                  alt={step.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
+                {/* Step number watermark */}
+                <div className="absolute top-6 right-8 text-[6rem] font-black text-white/5 leading-none select-none pointer-events-none">
+                  {step.number}
+                </div>
+
+                <div className={`w-14 h-14 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-8 ${step.iconColor}`}>
+                  <Icon className="w-7 h-7" />
+                </div>
+
+                <h3 className="text-2xl font-poppins text-white mb-4">{step.title}</h3>
+                <p className="text-stone-400 font-light leading-relaxed mb-8 text-sm md:text-base">
+                  {step.description}
+                </p>
+
+                <button
+                  onClick={() => navigate(step.link)}
+                  className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-white/60 hover:text-white transition-colors group/btn"
+                >
+                  {step.cta}
+                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                </button>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Divider */}
+        <div className="w-full h-px bg-white/5 mb-16" />
+
+        {/* Gallery strip */}
+        <div className="grid grid-cols-5 gap-3 md:gap-4">
+          {galleryImages.map((img, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="relative aspect-[9/16] rounded-[1.5rem] overflow-hidden border border-white/10 group"
+            >
+              <img
+                src={img}
+                alt=""
+                loading="lazy"
+                className="w-full h-full object-cover transition-all duration-500"
+              />
+              <div className="absolute inset-0 bg-black/10 transition-colors duration-500" />
+            </motion.div>
           ))}
         </div>
 

@@ -233,7 +233,7 @@ const FamilyPlanPage: React.FC = () => {
                             onClick={() => handleBookNow('Family of 2 Wellness Package')}
                             className="w-full py-3 border border-white/30 rounded-full hover:bg-white hover:text-black transition-all uppercase text-xs tracking-widest text-white"
                         >
-                            Book Consultation
+                            Book Now
                         </button>
                     </div>
 
@@ -260,7 +260,7 @@ const FamilyPlanPage: React.FC = () => {
                             onClick={() => handleBookNow('Family of 3 Wellness Package')}
                             className="w-full py-3 bg-black text-white rounded-full hover:bg-stone-800 transition-all uppercase text-xs tracking-widest font-bold"
                         >
-                            Book Consultation
+                            Book Now
                         </button>
                     </div>
 
@@ -284,27 +284,13 @@ const FamilyPlanPage: React.FC = () => {
                             onClick={() => handleBookNow('Family of 4 Wellness Package')}
                             className="w-full py-3 border border-white/30 rounded-full hover:bg-white hover:text-black transition-all uppercase text-xs tracking-widest text-white"
                         >
-                            Book Consultation
+                            Book Now
                         </button>
                     </div>
                 </div>
             </section>
 
-            {/* ENROLLMENT PROCESS */}
-            <section className="bg-stone-900/50 border-y border-white/5 py-20 mb-20">
-                <div className="max-w-3xl mx-auto px-6 text-center">
-                    <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center text-white mx-auto mb-6">
-                        <Phone className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-3xl md:text-4xl font-light text-white mb-6">How Enrollment Works</h3>
-                    <p className="text-stone-400 text-lg leading-relaxed mb-8">
-                        Enrollment begins with a short family consultation call. We understand your goals, schedule your sessions, and design your structure.
-                    </p>
-                    <p className="text-stone-500 text-sm italic">
-                        "Your family doesn't need separate schedules. You need one clear system."
-                    </p>
-                </div>
-            </section>
+
 
             {/* CTA */}
             <section className="max-w-4xl mx-auto px-6 text-center py-20 bg-gradient-to-t from-white/10 to-transparent rounded-t-[3rem] mt-20 relative overflow-hidden">
@@ -314,7 +300,10 @@ const FamilyPlanPage: React.FC = () => {
                         Every family is unique, and so is your wellness plan. Book your family consultation call to get started.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <button className="px-8 py-4 border border-white/30 text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all">
+                        <button 
+                            onClick={() => window.open('https://wa.me/919399441405?text=I\'d%20like%20to%20inquire%20about%20family%20wellness%20packages', '_blank')}
+                            className="px-8 py-4 border border-white/30 text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all"
+                        >
                             Contact Us
                         </button>
                         <button

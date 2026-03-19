@@ -9,35 +9,40 @@ const testimonials: Testimonial[] = [
         text: "The best!! really enjoyed Bhumika's lessons, she is AMAZING! she is so proffesional, gentle, sensitive, caring for the traineres, builds interesting and flowing routines! Her energy is so good! She is my favorite and im thankfull for the classes with her! ממליצה מאודד היא מושלמת באמת !",
         author: "Tali Itzhaki",
         role: "Member since 2023",
-        image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&q=80&w=2070"
+        image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&q=80&w=2070",
+        countryCode: "IL"
     },
     {
         id: "2",
         text: "I’ve been attending yoga sessions at Yog Sanskara by Bhumika Hardia, and it’s been an amazing experience. Her classes blend modern fitness with traditional ashtanga and vinyasa flow, guided with calm energy and humility. The sound healing at the end is deeply relaxing — I always leave feeling balanced and recharged.",
         author: "Bhaskar Uplawdiya",
         role: "Member since 2022",
-        image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&q=80&w=2070"
+        image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&q=80&w=2070",
+        countryCode: "IN"
     },
     {
         id: "3",
         text: "There once was a yogi named Bhumika,The best in all corners of India. She reads every part Of the body by heart, And her sound healing lifts your whole spirit up",
         author: "Shoham Saadia",
         role: "Remote Member",
-        image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=2040"
+        image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=2040",
+        countryCode: "IL"
     },
     {
         id: "4",
         text: "I’d like to warmly recommend Bhumika, a wonderful yoga teacher I practiced with in Kasar Devi, India. Her classes were grounding, inspiring, and deeply authentic. She creates a calm, welcoming space, explains each posture with clarity, and brings a beautiful balance of physical practice, breathwork, and mindfulness.",
         author: "Yuval hilel Antman ron",
         role: "Remote Member",
-        image: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=2070"
+        image: "https://images.unsplash.com/photo-1510894347713-fc3ed6fdf539?auto=format&fit=crop&q=80&w=2070",
+        countryCode: "IL"
     },
     {
         id: "5",
         text: "Very experienced yoga instructor with a lot of useful insights. Had a great few sessions that helped me quickly get into a good routine. Definitely knows a lot about their profession..",
         author: "Ujjwal Kumar",
         role: "Remote Member",
-        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=2062"
+        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=2062",
+        countryCode: "IN"
     }
 ];
 
@@ -56,7 +61,7 @@ const TestimonialsSection: React.FC = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             next();
-        }, 5000); // Change testimonial every 5 seconds
+        }, 10000); // Change testimonial every 10 seconds
 
         return () => clearInterval(interval);
     }, [currentIndex]);
@@ -117,7 +122,16 @@ const TestimonialsSection: React.FC = () => {
                                         "{testimonials[currentIndex].text}"
                                     </p>
                                     <div>
-                                        <h4 className="font-serif italic text-3xl text-white mb-2">{testimonials[currentIndex].author}</h4>
+                                        <h4 className="font-serif italic text-3xl text-white mb-2 flex items-center gap-3">
+                                            {testimonials[currentIndex].author}
+                                            {testimonials[currentIndex].countryCode && (
+                                                <img
+                                                    src={`https://flagcdn.com/w40/${testimonials[currentIndex].countryCode.toLowerCase()}.png`}
+                                                    alt={testimonials[currentIndex].countryCode}
+                                                    className="h-6 w-auto rounded-sm inline-block"
+                                                />
+                                            )}
+                                        </h4>
                                         <p className="text-stone-500 text-xs uppercase tracking-[0.2em] font-poppins font-semibold">{testimonials[currentIndex].role}</p>
                                     </div>
 

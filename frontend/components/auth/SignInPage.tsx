@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { Mail, Lock, Chrome } from 'lucide-react';
+import { getAuthErrorMessage } from '../../utils/errorMapping';
 
 const SignInPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -43,7 +44,7 @@ const SignInPage: React.FC = () => {
                 await signInWithEmailAndPassword(auth, email, password);
                 navigate('/dashboard');
             } catch (err: any) {
-                setError(err.message || 'Failed to sign in');
+                setError(getAuthErrorMessage(err.code || err.message));
             } finally {
                 setLoading(false);
             }
@@ -59,7 +60,7 @@ const SignInPage: React.FC = () => {
             await signInWithPopup(auth, provider);
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Failed to sign in with Google');
+            setError(getAuthErrorMessage(err.code || err.message));
         } finally {
             setLoading(false);
         }
@@ -111,8 +112,10 @@ const SignInPage: React.FC = () => {
                                     <Mail className="w-4 h-4 text-stone-500" />
                                     <input
                                         type="email"
+                                        autoComplete="email"
+                                        maxLength={100}
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => setEmail(e.target.value.trim())}
                                         placeholder="your@email.com"
                                         required
                                         className="bg-transparent outline-none text-white placeholder-stone-600 flex-1 text-sm"
@@ -126,6 +129,8 @@ const SignInPage: React.FC = () => {
                                     <Lock className="w-4 h-4 text-stone-500" />
                                     <input
                                         type="password"
+                                        autoComplete="current-password"
+                                        maxLength={128}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
