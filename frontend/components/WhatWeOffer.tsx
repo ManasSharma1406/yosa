@@ -98,6 +98,7 @@ const WhatWeOffer: React.FC = () => {
                                     src={offer.image}
                                     alt={offer.title}
                                     loading="lazy"
+                                    decoding="async"
                                     className="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />

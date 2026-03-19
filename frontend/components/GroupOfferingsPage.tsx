@@ -41,6 +41,7 @@ const GroupOfferingsPage: React.FC = () => {
                             src="/group offerings page.jpg"
                             alt="Group Offerings Background"
                             loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover opacity-70"
                         />
                     </div>

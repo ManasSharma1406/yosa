@@ -95,7 +95,7 @@ const TestimonialsSection: React.FC = () => {
                                     transition={{ duration: 0.6 }}
                                     className="aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
                                 >
-                                    <img src={testimonials[currentIndex].image} alt="User" className="w-full h-full object-cover opacity-90" />
+                                    <img src={testimonials[currentIndex].image} alt="User" decoding="async" className="w-full h-full object-cover opacity-90" />
                                 </motion.div>
                             </AnimatePresence>
                         </div>
@@ -128,6 +128,7 @@ const TestimonialsSection: React.FC = () => {
                                                 <img
                                                     src={`https://flagcdn.com/w40/${testimonials[currentIndex].countryCode.toLowerCase()}.png`}
                                                     alt={testimonials[currentIndex].countryCode}
+                                                    decoding="async"
                                                     className="h-6 w-auto rounded-sm inline-block"
                                                 />
                                             )}

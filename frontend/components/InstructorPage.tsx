@@ -22,6 +22,7 @@ const InstructorPage: React.FC = () => {
               <img
                 src="/profile.JPG"
                 alt="Bhumika"
+                decoding="async"
                 className="w-full h-full object-cover opacity-90"
               />
             </div>

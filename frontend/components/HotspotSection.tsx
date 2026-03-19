@@ -111,6 +111,7 @@ const HotspotSection: React.FC = () => {
                         src="/koshas.jpg"
                         alt="The Five Koshas"
                         loading="lazy"
+                        decoding="async"
                         className="max-w-full h-auto object-contain max-h-[85vh] opacity-90"
                     />
 

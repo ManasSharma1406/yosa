@@ -124,7 +124,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
             if (!response.ok) throw new Error(order.message || 'Failed to create order');
 
             const options = {
-                key: 'rzp_test_SDJGqJYlTmYyON',
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
                 name: 'FlowNest Studio',

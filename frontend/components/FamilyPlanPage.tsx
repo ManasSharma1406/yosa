@@ -56,9 +56,11 @@ const FamilyPlanPage: React.FC = () => {
                 <div className="relative rounded-[3rem] overflow-hidden h-[60vh] md:h-[80vh] w-full border border-white/10">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="/trial2_final.png"
+                            src="/family.jpg"
                             alt="Family Plan Background"
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vh] md:w-[195vh] h-[100vw] object-contain opacity-70 rotate-0"
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-cover opacity-70"
                         />
                         {/* Texture Overlay */}
                         <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none"

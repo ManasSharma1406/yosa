@@ -231,7 +231,7 @@ const AppInner: React.FC = () => {
         src="/hero.mp4"
         loop
         muted={isMuted}
-        preload="auto"
+        preload="none"
         style={{ display: 'none' }}
       />
 

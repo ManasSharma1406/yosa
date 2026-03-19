@@ -63,9 +63,10 @@ const PersonalYogaPage: React.FC = () => {
                 <div className="relative rounded-[3rem] overflow-hidden h-[60vh] md:h-[80vh] w-full border border-white/10">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="/trial1.JPG"
+                            src="/personal.jpg"
                             alt="Personal Yoga Background"
                             loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover opacity-80"
                         />
                     </div>

@@ -132,6 +132,7 @@ const HowItWorksSection: React.FC = () => {
                 src={img}
                 alt=""
                 loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-all duration-500"
               />
               <div className="absolute inset-0 bg-black/10 transition-colors duration-500" />
