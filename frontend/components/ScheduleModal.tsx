@@ -127,7 +127,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
-                name: 'FlowNest Studio',
+                name: 'Yog-Samskara',
                 description: selectedPlan || 'Yoga Plan',
                 image: '/red.png',
                 order_id: order.id,

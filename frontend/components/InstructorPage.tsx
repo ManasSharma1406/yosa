@@ -65,12 +65,20 @@ const InstructorPage: React.FC = () => {
 
               <div className="mt-12 flex gap-8">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-4xl font-serif italic text-white">6+</h3>
+                  <h3 className="text-4xl font-serif italic text-white">9+</h3>
                   <span className="text-xs uppercase tracking-widest text-stone-500">Years Teaching</span>
                 </div>
                 <div className="flex flex-col gap-2">
                   <h3 className="text-4xl font-serif italic text-white">Master's</h3>
                   <span className="text-xs uppercase tracking-widest text-stone-500">in Yoga Therapy</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-4xl font-serif italic text-white">1200 Ryt</h3>
+                  <span className="text-xs uppercase tracking-widest text-stone-500">Ashtanga Vinyasa - Hatha - Aerial Yoga</span>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-4xl font-serif italic text-white">Tibetan</h3>
+                  <span className="text-xs uppercase tracking-widest text-stone-500">Singing Bowl Sound Healing</span>
                 </div>
               </div>
             </motion.div>

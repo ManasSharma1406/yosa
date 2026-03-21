@@ -56,7 +56,7 @@ const FamilyPlanPage: React.FC = () => {
                 <div className="relative rounded-[3rem] overflow-hidden h-[60vh] md:h-[80vh] w-full border border-white/10">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="/family.jpg"
+                            src="/trial2_final.png"
                             alt="Family Plan Background"
                             loading="lazy"
                             decoding="async"
@@ -302,7 +302,7 @@ const FamilyPlanPage: React.FC = () => {
                         Every family is unique, and so is your wellness plan. Book your family consultation call to get started.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <button 
+                        <button
                             onClick={() => window.open('https://wa.me/919399441405?text=I\'d%20like%20to%20inquire%20about%20family%20wellness%20packages', '_blank')}
                             className="px-8 py-4 border border-white/30 text-white rounded-full font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all"
                         >
