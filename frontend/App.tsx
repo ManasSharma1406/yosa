@@ -27,7 +27,6 @@ import { BookingProvider, useBooking } from './context/BookingContext';
 import ScheduleModal from './components/ScheduleModal';
 import ScrollToTop from './components/ScrollToTop';
 import QuestionnairePage from './components/QuestionnairePage';
-import IntakePopup from './components/IntakePopup';
 import NotFoundPage from './components/NotFoundPage';
 import TeacherDashboard from './components/admin/TeacherDashboard';
 
@@ -263,7 +262,6 @@ const AppInner: React.FC = () => {
         <WhatsAppButton />
         <CalendarButton />
         <ContactPopup isOpen={showContactPopup} onClose={() => setShowContactPopup(false)} />
-        <IntakePopup />
 
         <TopRightAuth hidden={hidden} />
 

@@ -47,12 +47,20 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
     const [payLoading, setPayLoading] = useState(false);
     const [failedReason, setFailedReason] = useState('');
 
+    // Promo code state
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercentage: number } | null>(null);
+    const [promoError, setPromoError] = useState('');
+    const [isApplyingPromo, setIsApplyingPromo] = useState(false);
+
     const navigate = useNavigate();
     const { getIdToken } = useAuth();
 
     const planPrice = selectedPlan ? (PLAN_PRICE_MAP[selectedPlan] ?? 0) : 0;
     const addonsTotal = ADDONS.filter(a => selectedAddons.includes(a.id)).reduce((sum, a) => sum + a.price, 0);
-    const totalToPay = planPrice + addonsTotal;
+    const subtotal = planPrice + addonsTotal;
+    const discountAmount = appliedPromo ? (subtotal * appliedPromo.discountPercentage) / 100 : 0;
+    const totalToPay = Math.max(0, subtotal - discountAmount);
 
     useEffect(() => {
         if (isOpen) {
@@ -97,6 +105,48 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
         );
     };
 
+    const handleApplyPromo = async () => {
+        if (!promoCodeInput.trim()) return;
+
+        setIsApplyingPromo(true);
+        setPromoError('');
+
+        try {
+            const user = auth.currentUser;
+            const idToken = user ? await getIdToken() : '';
+
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/payments/apply-promo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({ code: promoCodeInput })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                setAppliedPromo({
+                    code: data.code,
+                    discountPercentage: data.discountPercentage
+                });
+                setPromoCodeInput('');
+            } else {
+                setPromoError(data.message || 'Invalid promo code');
+            }
+        } catch (error) {
+            setPromoError('Failed to apply promo code');
+        } finally {
+            setIsApplyingPromo(false);
+        }
+    };
+
+    const unapplyPromo = () => {
+        setAppliedPromo(null);
+        setPromoError('');
+    };
+
     const handlePay = async () => {
         setPayLoading(true);
         setFailedReason('');
@@ -117,11 +167,19 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                     planName: selectedPlan,
                     currency: 'USD',
                     userId: user?.uid || 'guest',
+                    promoCode: appliedPromo?.code
                 }),
             });
 
             const order = await response.json();
             if (!response.ok) throw new Error(order.message || 'Failed to create order');
+
+            // If it's a 100% discount, the backend directly activates the subscription
+            if (order.isFreeCheckout) {
+                setStep('success');
+                setPayLoading(false);
+                return;
+            }
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -420,6 +478,25 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                         </div>
                                                     )}
 
+                                                    {/* Subtotal */}
+                                                    {(selectedAddons.length > 0 || appliedPromo) && (
+                                                        <div className="pt-4 border-t border-stone-100 flex justify-between items-center text-stone-600 font-medium">
+                                                            <span>Subtotal</span>
+                                                            <span>${subtotal}</span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Discount */}
+                                                    {appliedPromo && (
+                                                        <div className="flex justify-between items-center text-green-600 text-sm font-medium">
+                                                            <div className="flex items-center gap-2">
+                                                                <span>Discount ({appliedPromo.discountPercentage}%)</span>
+                                                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider">{appliedPromo.code}</span>
+                                                            </div>
+                                                            <span>-${discountAmount.toFixed(2)}</span>
+                                                        </div>
+                                                    )}
+
                                                     {/* Total */}
                                                     <div className="flex justify-between items-center pt-4 border-t border-stone-200 font-bold">
                                                         <span className="text-slate-900">Total to Pay</span>
@@ -427,6 +504,42 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                             ${totalToPay}
                                                         </span>
                                                     </div>
+                                                </div>
+
+                                                {/* Promo Code Section */}
+                                                <div className="space-y-4">
+                                                    <h3 className="text-sm uppercase tracking-widest text-stone-400 font-poppins mb-2">Have a promo code?</h3>
+                                                    {appliedPromo ? (
+                                                        <div className="flex items-center justify-between p-4 rounded-xl border border-green-200 bg-green-50">
+                                                            <div className="flex items-center gap-2">
+                                                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                                                <span className="text-sm font-medium text-green-800">Code '{appliedPromo.code}' applied</span>
+                                                            </div>
+                                                            <button onClick={unapplyPromo} className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={promoCodeInput}
+                                                                onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                                                                placeholder="Enter Promo Code"
+                                                                className="flex-1 bg-gray-50 border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 uppercase transition-all placeholder:normal-case"
+                                                            />
+                                                            <button
+                                                                onClick={handleApplyPromo}
+                                                                disabled={isApplyingPromo || !promoCodeInput.trim()}
+                                                                className="px-6 py-3 bg-black text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-black/80 transition-colors disabled:opacity-80 flex items-center justify-center min-w-[100px]"
+                                                            >
+                                                                {isApplyingPromo ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                    {promoError && (
+                                                        <p className="text-red-500 text-xs italic">{promoError}</p>
+                                                    )}
                                                 </div>
 
                                                 {/* Add-on toggles */}
