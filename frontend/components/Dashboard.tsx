@@ -911,7 +911,7 @@ const Dashboard: React.FC = () => {
 
                                         <div className="h-px bg-white/10 w-full mb-8" />
 
-                                        <div className="grid grid-cols-2 gap-y-8 gap-x-4 relative z-10">
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-4 relative z-10">
                                             <div>
                                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Total Sessions</p>
                                                 <p className="text-xl font-medium text-white tracking-wide">{subscription.totalSessions}</p>
@@ -919,6 +919,14 @@ const Dashboard: React.FC = () => {
                                             <div>
                                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Completed Classes</p>
                                                 <p className="text-xl font-medium text-white tracking-wide">{completedSessions.length}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Amount Paid</p>
+                                                <p className={`text-xl font-medium tracking-wide ${subscription.amountPaid > 0 ? 'text-white' : 'text-green-400'}`}>
+                                                    {subscription.amountPaid > 0 
+                                                        ? `${subscription.currency === 'USD' ? '$' : '₹'}${subscription.amountPaid}` 
+                                                        : (subscription.amountPaid === 0 ? 'Free (Promo)' : 'N/A')}
+                                                </p>
                                             </div>
                                             <div>
                                                 <p className="text-[10px] text-stone-500 uppercase tracking-widest mb-1.5 font-semibold">Booked / Upcoming</p>
