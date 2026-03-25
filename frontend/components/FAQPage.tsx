@@ -35,6 +35,10 @@ const faqCategories = [
       {
         q: "How do I cancel or reschedule a booked session?",
         a: "Booked sessions can be managed through your student dashboard. Please provide adequate notice if you need to reschedule."
+      },
+      {
+        q: "When does my package expire? What happens to unused sessions?",
+        a: "Your package remains active until all your sessions have been used — there is no fixed expiry date based on time alone. However, if you have not used any of your sessions within 2 months of purchase, all unused sessions will automatically vanish and your package will be deactivated. This policy encourages a consistent practice. We recommend booking your sessions soon after purchase to make the most of your plan."
       }
     ]
   },
