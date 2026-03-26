@@ -109,6 +109,7 @@ const Dashboard: React.FC = () => {
     const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
     const [loadingPaymentHistory, setLoadingPaymentHistory] = useState(true);
     const [imgError, setImgError] = useState(false);
+    const [historyTab, setHistoryTab] = useState<'classes' | 'purchases'>('classes');
 
     // Embedded Calendar State
     const [selectedSlots, setSelectedSlots] = useState<{date: Date, time: string}[]>([]);
@@ -1003,7 +1004,7 @@ const Dashboard: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {!hasActivePlan ? (
+                                        {(!hasActivePlan && privateSessions.length === 0 && groupSessions.length === 0) ? (
                                             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-black/40 rounded-3xl border border-white/10 backdrop-blur-md relative z-20">
                                                 <Lock className="w-12 h-12 text-stone-500 mb-4" />
                                                 <h3 className="text-2xl font-poppins mb-2 text-white">Plan Inactive</h3>
@@ -1014,6 +1015,12 @@ const Dashboard: React.FC = () => {
                                             </div>
                                         ) : (
                                             <div className="space-y-12 flex-1 relative z-10 transition-all duration-300">
+                                                {!hasActivePlan && (
+                                                    <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-200 text-sm flex items-start gap-3">
+                                                        <Info className="w-5 h-5 shrink-0 mt-0.5" />
+                                                        <p>Your plan is inactive but you still have upcoming classes. You will need to renew your plan to book additional sessions.</p>
+                                                    </div>
+                                                )}
                                                 {/* Private Sessions */}
                                                 <div className="space-y-6">
                                                     <h5 className="flex items-center gap-4 text-sm font-semibold tracking-widest uppercase text-stone-300">
@@ -1204,51 +1211,103 @@ const Dashboard: React.FC = () => {
                                     <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
 
                                     <div className="flex items-center justify-between mb-8 relative z-10">
-                                        <h4 className="text-xs uppercase tracking-[0.2em] text-stone-400 font-bold flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.8)]" /> Classes History
+                                        <h4 className="flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.8)]" /> 
+                                            <div className="flex bg-black/40 rounded-full border border-white/5 p-1">
+                                                <button 
+                                                    onClick={() => setHistoryTab('classes')}
+                                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${historyTab === 'classes' ? 'bg-white text-black' : 'text-stone-400 hover:text-white'}`}
+                                                >
+                                                    Classes
+                                                </button>
+                                                <button 
+                                                    onClick={() => setHistoryTab('purchases')}
+                                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${historyTab === 'purchases' ? 'bg-white text-black' : 'text-stone-400 hover:text-white'}`}
+                                                >
+                                                    Purchases
+                                                </button>
+                                            </div>
                                         </h4>
                                         <div className="p-2 bg-white/5 border border-white/10 rounded-full text-stone-300">
-                                            <History className="w-4 h-4" />
+                                            {historyTab === 'classes' ? <History className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
                                         </div>
                                     </div>
 
-                                    <div className="relative z-10 flex-1 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
-                                        {pastSessions.length > 0 ? (
-                                            <div className="space-y-4">
-                                                {pastSessions.map((session, i) => (
-                                                    <div key={session._id || i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/10 transition-all duration-300 group/history-item">
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="w-12 h-12 rounded-xl bg-stone-800 border border-white/10 flex flex-col items-center justify-center flex-shrink-0 group-hover/history-item:border-white/20 transition-colors">
-                                                                <span className="text-[8px] text-stone-500 uppercase font-bold tracking-tighter">{new Date(session.date).toLocaleString('default', { month: 'short' })}</span>
-                                                                <span className="text-sm font-bold text-white leading-tight">{new Date(session.date).getDate()}</span>
+                                    {historyTab === 'classes' ? (
+                                        <>
+                                            <div className="relative z-10 flex-1 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
+                                                {pastSessions.length > 0 ? (
+                                                    <div className="space-y-4">
+                                                        {pastSessions.map((session, i) => (
+                                                            <div key={session._id || i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/10 transition-all duration-300 group/history-item">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-12 h-12 rounded-xl bg-stone-800 border border-white/10 flex flex-col items-center justify-center flex-shrink-0 group-hover/history-item:border-white/20 transition-colors">
+                                                                        <span className="text-[8px] text-stone-500 uppercase font-bold tracking-tighter">{new Date(session.date).toLocaleString('default', { month: 'short' })}</span>
+                                                                        <span className="text-sm font-bold text-white leading-tight">{new Date(session.date).getDate()}</span>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-stone-200 font-semibold text-sm tracking-wide">{session.sessionType || 'Yoga Session'}</p>
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            <span className="text-[9px] text-stone-500 font-medium uppercase tracking-widest">{session.time}</span>
+                                                                            <span className="w-1 h-1 rounded-full bg-stone-700" />
+                                                                            <span className="text-[9px] text-green-500/80 font-bold uppercase tracking-widest">Completed</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <button className="p-2 rounded-full bg-white/5 border border-white/10 text-stone-400 hover:text-white hover:bg-white/10 transition-all">
+                                                                    <FileText className="w-3.5 h-3.5" />
+                                                                </button>
                                                             </div>
-                                                            <div>
-                                                                <p className="text-stone-200 font-semibold text-sm tracking-wide">{session.sessionType || 'Yoga Session'}</p>
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <span className="text-[9px] text-stone-500 font-medium uppercase tracking-widest">{session.time}</span>
-                                                                    <span className="w-1 h-1 rounded-full bg-stone-700" />
-                                                                    <span className="text-[9px] text-green-500/80 font-bold uppercase tracking-widest">Completed</span>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
+                                                        <History className="w-10 h-10 mb-3 text-stone-600" />
+                                                        <p className="text-sm font-medium tracking-wide">No past sessions found.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="mt-8 pt-6 border-t border-white/10 relative z-10 flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                                                <span>Total Sessions Attended</span>
+                                                <span className="text-white text-lg font-serif italic">{pastSessions.length}</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="relative z-10 flex-1 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar">
+                                                {paymentHistory.length > 0 ? (
+                                                    <div className="space-y-4">
+                                                        {paymentHistory.map((payment, i) => (
+                                                            <div key={payment.id || i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/10 transition-all duration-300 group/history-item">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-12 h-12 rounded-xl bg-indigo-900/30 border border-indigo-500/20 flex flex-col items-center justify-center flex-shrink-0 group-hover/history-item:border-white/20 transition-colors">
+                                                                        <Receipt className="w-5 h-5 text-indigo-400" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-stone-200 font-semibold text-sm tracking-wide">{payment.planName || 'Self-Paced Plan'}</p>
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            <span className="text-[9px] text-stone-500 font-medium uppercase tracking-widest">{new Date(payment.createdAt).toLocaleDateString()}</span>
+                                                                            <span className="w-1 h-1 rounded-full bg-stone-700" />
+                                                                            <span className={`text-[9px] font-bold uppercase tracking-widest ${payment.status === 'captured' ? 'text-green-500/80' : 'text-amber-500/80'}`}>{payment.status || 'Success'}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                        <p className="text-white font-bold text-sm">{payment.amount > 0 ? `${payment.currency === 'USD' ? '$' : '₹'}${payment.amount}` : 'Free'}</p>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <button className="p-2 rounded-full bg-white/5 border border-white/10 text-stone-400 hover:text-white hover:bg-white/10 transition-all">
-                                                            <FileText className="w-3.5 h-3.5" />
-                                                        </button>
+                                                        ))}
                                                     </div>
-                                                ))}
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
+                                                        <Receipt className="w-10 h-10 mb-3 text-stone-600" />
+                                                        <p className="text-sm font-medium tracking-wide">No purchase history found.</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center py-12 text-center opacity-40">
-                                                <History className="w-10 h-10 mb-3 text-stone-600" />
-                                                <p className="text-sm font-medium tracking-wide">No past sessions found.</p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="mt-8 pt-6 border-t border-white/10 relative z-10 flex justify-between items-center text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500">
-                                        <span>Total Sessions Attended</span>
-                                        <span className="text-white text-lg font-serif italic">{pastSessions.length}</span>
-                                    </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
