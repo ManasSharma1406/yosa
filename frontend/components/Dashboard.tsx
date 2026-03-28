@@ -21,6 +21,10 @@ const Dashboard: React.FC = () => {
     const navigate = useNavigate();
     const photoInputRef = useRef<HTMLInputElement>(null);
 
+    // Coming soon state
+    const comingSoonTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [showComingSoon, setShowComingSoon] = useState(false);
+
     // Vanta.js background effect
     const [vantaEffect, setVantaEffect] = useState<any>(null);
     const vantaRef = useRef(null);
@@ -349,6 +353,12 @@ const Dashboard: React.FC = () => {
         } finally {
             setIsUpdating(false);
         }
+    };
+
+    const handleRecordedLinksClick = () => {
+        setShowComingSoon(true);
+        if (comingSoonTimeoutRef.current) clearTimeout(comingSoonTimeoutRef.current);
+        comingSoonTimeoutRef.current = setTimeout(() => setShowComingSoon(false), 3000);
     };
 
     const rawName = user.displayName || user.email?.split('@')[0] || '';
@@ -976,7 +986,7 @@ const Dashboard: React.FC = () => {
                                     </div>
 
                                     {/* Recorded Video Links Button */}
-                                    <button className="gradient-border-card-alt bg-white/5 rounded-full py-5 px-8 backdrop-blur-2xl flex justify-between items-center cursor-pointer hover:bg-white/10 transition-all duration-300 group shadow-lg">
+                                    <button onClick={handleRecordedLinksClick} className="gradient-border-card-alt bg-white/5 rounded-full py-5 px-8 backdrop-blur-2xl flex justify-between items-center cursor-pointer hover:bg-white/10 transition-all duration-300 group shadow-lg">
                                         <span className="text-sm text-stone-200 font-bold tracking-widest uppercase">Recorded Video Links</span>
                                         <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center group-hover:scale-110 group-hover:bg-stone-200 transition-all duration-300 shadow-lg">
                                             <ExternalLink className="w-4 h-4" />
@@ -1789,6 +1799,21 @@ const Dashboard: React.FC = () => {
                     >
                         <Clock className="w-5 h-5" />
                         <span className="text-xs font-bold uppercase tracking-widest">Link will open 15 mins before class starts</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Coming Soon Notification */}
+            <AnimatePresence>
+                {showComingSoon && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100] bg-white text-black px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 border border-white/20 backdrop-blur-3xl"
+                    >
+                        <Sparkles className="w-5 h-5 text-indigo-500" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Coming Soon</span>
                     </motion.div>
                 )}
             </AnimatePresence>
