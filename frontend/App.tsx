@@ -68,7 +68,7 @@ const TopRightAuth: React.FC<{ hidden: boolean }> = ({ hidden }) => {
       ) : (
         <>
           <button
-            onClick={() => navigate(isAdmin ? '/instructor' : '/dashboard')}
+            onClick={() => navigate(isAdmin ? '/teacher-dashboard' : '/dashboard')}
             className="px-6 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-white text-sm font-semibold hover:bg-white/10 transition-all font-poppins"
           >
             Dashboard

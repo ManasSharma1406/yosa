@@ -430,8 +430,23 @@ const TeacherDashboard: React.FC = () => {
                                                                     {booking.status}
                                                                 </span>
                                                             </div>
-                                                            <p className="text-3xl font-serif italic mb-2">{booking.date}</p>
-                                                            <p className="text-stone-400 font-medium tracking-wide">at {booking.time}</p>
+                                                            {(() => {
+                                                                let displayDate = booking.date;
+                                                                let displayTime = booking.time;
+                                                                if (booking.date && booking.date.includes('T')) {
+                                                                    try {
+                                                                        const d = new Date(booking.date);
+                                                                        displayDate = d.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });
+                                                                        displayTime = d.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });
+                                                                    } catch(e) {}
+                                                                }
+                                                                return (
+                                                                    <>
+                                                                        <p className="text-3xl font-sans font-semibold mb-2">{displayDate}</p>
+                                                                        <p className="text-stone-400 font-medium tracking-wide">at {displayTime}</p>
+                                                                    </>
+                                                                );
+                                                            })()}
                                                             <p className="text-xs text-stone-500 mt-4 uppercase tracking-[0.2em]">Intensity: {booking.intensity}%</p>
                                                         </div>
 

@@ -228,7 +228,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, isMuted, onTog
                     <button
                       onClick={() => {
                         setIsOpen(false);
-                        navigate(isAdmin ? '/instructor' : '/dashboard');
+                        navigate(isAdmin ? '/teacher-dashboard' : '/dashboard');
                       }}
                       className="w-full px-6 py-4 rounded-full bg-white/5 border border-white/10 text-white text-lg font-semibold hover:bg-white/10 transition-all"
                     >
