@@ -53,8 +53,11 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
     const [promoError, setPromoError] = useState('');
     const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
+    const [activeSubscription, setActiveSubscription] = useState<any>(null);
+    const [subLoading, setSubLoading] = useState(false);
+
     const navigate = useNavigate();
-    const { getIdToken } = useAuth();
+    const { getIdToken, user } = useAuth();
 
     const planPrice = selectedPlan ? (PLAN_PRICE_MAP[selectedPlan] ?? 0) : 0;
     const addonsTotal = ADDONS.filter(a => selectedAddons.includes(a.id)).reduce((sum, a) => sum + a.price, 0);
@@ -72,13 +75,36 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                 setStep('offering');
                 setSelectedPlan(null);
             }
+            
+            // Check active sub
+            const checkSub = async () => {
+                if (!user) return;
+                setSubLoading(true);
+                try {
+                    const token = await getIdToken();
+                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/subscriptions/status`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.data) {
+                            setActiveSubscription(result.data);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch subscription status', error);
+                } finally {
+                    setSubLoading(false);
+                }
+            };
+            checkSub();
         } else {
             document.body.classList.remove('modal-open');
         }
         return () => {
             document.body.classList.remove('modal-open');
         };
-    }, [isOpen, initialPlan]);
+    }, [isOpen, initialPlan, user, getIdToken]);
 
     const handleOfferingSelect = (offering: string) => {
         setSelectedOffering(offering);
@@ -581,17 +607,34 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 </div>
 
                                                 {/* Pay/Confirm Button */}
-                                                <button
-                                                    onClick={handlePay}
-                                                    disabled={payLoading}
-                                                    className="w-full py-5 bg-black text-white rounded-2xl font-bold text-base tracking-wide hover:bg-stone-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-xl shadow-stone-200"
-                                                >
-                                                    {payLoading ? (
-                                                        <><Loader2 className="w-5 h-5 animate-spin" /> Initiating Payment...</>
-                                                    ) : (
-                                                        `Pay $${totalToPay} Now`
-                                                    )}
-                                                </button>
+                                                {subLoading ? (
+                                                    <div className="w-full py-5 bg-stone-100/50 rounded-2xl flex items-center justify-center">
+                                                        <Loader2 className="w-5 h-5 text-stone-400 animate-spin" />
+                                                    </div>
+                                                ) : (activeSubscription?.status === 'active' && activeSubscription?.planName !== 'Free') ? (
+                                                    <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-start gap-3 w-full">
+                                                        <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                                        <div>
+                                                            <p className="text-red-700 font-semibold text-sm mb-1">Active Plan Detected</p>
+                                                            <p className="text-red-600/80 text-xs leading-relaxed">
+                                                                You currently have an active <strong>{activeSubscription.planName}</strong> plan. 
+                                                                To prevent losing any existing sessions or validity, please wait for your plan to expire or use all remaining sessions before purchasing a new package.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={handlePay}
+                                                        disabled={payLoading}
+                                                        className="w-full py-5 bg-black text-white rounded-2xl font-bold text-base tracking-wide hover:bg-stone-900 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-xl shadow-stone-200"
+                                                    >
+                                                        {payLoading ? (
+                                                            <><Loader2 className="w-5 h-5 animate-spin" /> Initiating Payment...</>
+                                                        ) : (
+                                                            `Pay $${totalToPay} Now`
+                                                        )}
+                                                    </button>
+                                                )}
 
                                                 <p className="text-center text-[10px] text-stone-400 uppercase tracking-widest leading-relaxed">
                                                     By paying, you agree to FlowNest Studio's{' '}

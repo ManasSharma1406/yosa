@@ -1096,15 +1096,9 @@ const Dashboard: React.FC = () => {
                                                                 </div>
                                                             ))
                                                         ) : (
-                                                            <div onClick={() => openBookingModal()} className="p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 flex justify-between items-center group cursor-pointer border-dashed hover:border-solid">
-                                                                <div className="flex items-center gap-6">
-                                                                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center"><Calendar className="w-6 h-6 text-stone-400 group-hover:text-stone-200 transition-colors" /></div>
-                                                                    <div>
-                                                                        <p className="text-white font-semibold text-base tracking-wide group-hover:text-stone-200">Book a Group Class</p>
-                                                                        <p className="text-[10px] text-stone-500 uppercase tracking-widest mt-1.5 font-bold">Explore upcoming sessions</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-stone-400 group-hover:bg-white group-hover:text-black group-hover:border-white transition-all shadow-lg"><ExternalLink className="w-4 h-4" /></div>
+                                                            <div className="flex flex-col items-center justify-center p-8 bg-white/[0.02] rounded-3xl border border-white/[0.05] border-dashed">
+                                                                <Activity className="w-8 h-8 text-stone-600 mb-3" />
+                                                                <p className="text-stone-400 font-medium text-sm">No group classes booked.</p>
                                                             </div>
                                                         )}
                                                     </div>
