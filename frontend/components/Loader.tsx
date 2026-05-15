@@ -163,9 +163,9 @@ const Loader: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                 </motion.div>
               ))}
 
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-center px-4">
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 text-center px-4 md:px-8">
                 <motion.h1
-                  className="text-white text-5xl md:text-7xl font-poppins mb-6 tracking-wide"
+                  className="text-white text-[18vw] xs:text-7xl md:text-7xl font-poppins mb-6 md:mb-6 tracking-wide leading-none md:leading-normal"
                   initial="hidden"
                   animate="visible"
                   variants={{
@@ -193,12 +193,12 @@ const Loader: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
                 </motion.h1>
 
                 <motion.div
-                  className="max-w-xl mb-12"
+                  className="max-w-xs md:max-w-xl mb-12"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 2.2, duration: 1 }}
                 >
-                  <p className="text-white/80 text-lg md:text-xl font-light font-sans tracking-wider leading-relaxed">
+                  <p className="text-white/80 text-xl sm:text-lg md:text-xl font-light font-sans tracking-wider leading-relaxed">
                     "{quote}"
                   </p>
                 </motion.div>

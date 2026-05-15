@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 const hotspots = [
     {
@@ -121,8 +122,21 @@ const HotspotSection: React.FC = () => {
                             key={spot.id}
                             className="absolute cursor-pointer z-20"
                             style={{ top: `${spot.y}%`, left: `${spot.x}%`, transform: 'translate(-50%, -50%)' }}
-                            onMouseEnter={() => setActiveSpot(spot.id)}
-                            onMouseLeave={() => setActiveSpot(null)}
+                            onClick={() => {
+                                if (window.innerWidth < 768) {
+                                    setActiveSpot(activeSpot === spot.id ? null : spot.id);
+                                }
+                            }}
+                            onMouseEnter={() => {
+                                if (window.innerWidth >= 768) {
+                                    setActiveSpot(spot.id);
+                                }
+                            }}
+                            onMouseLeave={() => {
+                                if (window.innerWidth >= 768) {
+                                    setActiveSpot(null);
+                                }
+                            }}
                         >
                             {/* The Dot */}
                             <motion.div
@@ -138,9 +152,10 @@ const HotspotSection: React.FC = () => {
                                 />
                             </motion.div>
 
-                            {/* The Card & Connector Line */}
-                            <AnimatePresence>
-                                {activeSpot === spot.id && (
+                            {/* The Card & Connector Line (DESKTOP ONLY) */}
+                            <div className="hidden md:block">
+                                <AnimatePresence>
+                                    {activeSpot === spot.id && (
                                     <>
                                         {/* Connector Line */}
                                         <motion.div
@@ -148,7 +163,7 @@ const HotspotSection: React.FC = () => {
                                             animate={{ width: 100, opacity: 1 }}
                                             exit={{ width: 0, opacity: 0 }}
                                             transition={{ duration: 0.3 }}
-                                            className={`absolute top-1/2 h-[1px] bg-white/50 z-0 pointer-events-none ${spot.position === 'right' ? 'left-full' : 'right-full'
+                                            className={`absolute top-1/2 h-[1px] bg-white/50 z-0 pointer-events-none max-md:hidden ${spot.position === 'right' ? 'left-full' : 'right-full'
                                                 }`}
                                         />
 
@@ -158,14 +173,26 @@ const HotspotSection: React.FC = () => {
                                             animate={{ opacity: 1, scale: 1, x: 0 }}
                                             exit={{ opacity: 0, scale: 0.9, x: spot.position === 'right' ? 10 : -10 }}
                                             transition={{ duration: 0.3 }}
-                                            className={`absolute top-1/2 -translate-y-1/2 w-[300px] md:w-[400px] bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-2xl z-50 text-left ${spot.position === 'right'
+                                            className={`absolute top-1/2 -translate-y-1/2 w-[400px] bg-white/10 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-2xl z-50 text-left ${spot.position === 'right'
                                                 ? 'left-full ml-[100px]'
                                                 : 'right-full mr-[100px]'
                                                 }`}
+                                            onClick={(e) => e.stopPropagation()}
                                         >
-                                            <h4 className="font-serif italic text-white text-xl md:text-2xl mb-4 border-b border-white/20 pb-2">
-                                                {spot.label}
-                                            </h4>
+                                            <div className="flex justify-between items-start mb-4 border-b border-white/20 pb-2">
+                                                <h4 className="font-serif italic text-white text-xl md:text-2xl pr-4">
+                                                    {spot.label}
+                                                </h4>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setActiveSpot(null);
+                                                    }}
+                                                    className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
+                                                >
+                                                    <X className="w-4 h-4 md:w-5 md:h-5" />
+                                                </button>
+                                            </div>
                                             <ul className="space-y-2">
                                                 {spot.content.map((line, i) => (
                                                     <li key={i} className="text-stone-300 text-sm font-light leading-relaxed flex items-start gap-2">
@@ -177,11 +204,53 @@ const HotspotSection: React.FC = () => {
                                         </motion.div>
                                     </>
                                 )}
-                            </AnimatePresence>
+                                </AnimatePresence>
+                            </div>
                         </div>
                     ))}
                 </div>
             </div>
+
+            {/* Mobile Full Screen Modal */}
+            <AnimatePresence>
+                {activeSpot !== null && (
+                    <motion.div
+                        className="fixed inset-0 z-[100] md:hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setActiveSpot(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="w-full max-w-sm bg-white/10 backdrop-blur-2xl border border-white/20 p-6 sm:p-8 rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.5)] overflow-y-auto max-h-[85vh] relative text-left"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-start mb-6 pb-4 border-b border-white/20 relative">
+                                <h4 className="font-serif italic text-white text-2xl pr-8 leading-tight">
+                                    {hotspots.find((s) => s.id === activeSpot)?.label}
+                                </h4>
+                                <button
+                                    onClick={() => setActiveSpot(null)}
+                                    className="p-2 -mr-2 -mt-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0 absolute top-0 right-0"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <ul className="space-y-4">
+                                {hotspots.find((s) => s.id === activeSpot)?.content.map((line, i) => (
+                                    <li key={i} className="text-stone-200 text-sm font-light leading-relaxed flex items-start gap-3">
+                                        <span className="w-1.5 h-1.5 bg-white/60 rounded-full mt-1.5 shrink-0"></span>
+                                        {line}
+                                    </li>
+                                ))}
+                            </ul>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     );
 };

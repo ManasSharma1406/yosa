@@ -278,6 +278,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
 
     const handleGoToDashboard = () => {
         resetAndClose();
+        window.dispatchEvent(new Event('refresh_dashboard'));
         navigate('/dashboard');
     };
 

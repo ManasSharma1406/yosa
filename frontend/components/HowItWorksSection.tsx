@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, CalendarDays, Video, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,6 +49,14 @@ const galleryImages = [
 
 const HowItWorksSection: React.FC = () => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+    }, 5000); // 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="relative py-24 bg-black overflow-hidden">
@@ -71,7 +79,7 @@ const HowItWorksSection: React.FC = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-6xl font-serif italic text-white leading-tight"
           >
-            Start your journey in <span className="text-stone-400">3 steps</span>
+            Start your journey in <span className="text-stone-400 max-md:block">3 steps</span>
           </motion.h2>
         </div>
 
@@ -117,8 +125,8 @@ const HowItWorksSection: React.FC = () => {
         {/* Divider */}
         <div className="w-full h-px bg-white/5 mb-16" />
 
-        {/* Gallery strip */}
-        <div className="grid grid-cols-5 gap-3 md:gap-4">
+        {/* Gallery strip - Desktop */}
+        <div className="hidden md:grid grid-cols-5 gap-4">
           {galleryImages.map((img, i) => (
             <motion.div
               key={i}
@@ -138,6 +146,31 @@ const HowItWorksSection: React.FC = () => {
               <div className="absolute inset-0 bg-black/10 transition-colors duration-500" />
             </motion.div>
           ))}
+        </div>
+
+        {/* Gallery strip - Mobile (Auto-Scrolling Slider) */}
+        <div className="md:hidden flex justify-center w-full overflow-hidden px-4">
+            <div className="w-[55vw] max-w-[220px] aspect-[9/16] relative">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={currentImageIndex}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.6 }}
+                        className="absolute inset-0 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+                    >
+                        <img
+                            src={galleryImages[currentImageIndex]}
+                            alt="Gallery"
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/10" />
+                    </motion.div>
+                </AnimatePresence>
+            </div>
         </div>
 
       </div>

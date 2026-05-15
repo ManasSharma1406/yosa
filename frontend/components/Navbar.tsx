@@ -55,6 +55,9 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, isMuted, onTog
     } else if (target === 'family-plan') {
       onNavigate('family-plan');
       window.scrollTo(0, 0);
+    } else if (target === 'retreats') {
+      onNavigate('retreats');
+      window.scrollTo(0, 0);
     } else {
       onNavigate('home');
       // If target is an anchor link (starts with #), we need to let the home page render first
@@ -155,6 +158,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, isMuted, onTog
             </div>
 
             <a
+              href="#retreats"
+              onClick={(e) => handleNavClick(e, 'retreats')}
+              className={`hover:text-white transition-colors ${currentPage === 'retreats' ? 'text-white' : ''}`}
+            >
+              Retreats
+            </a>
+
+            <a
               href="#faq"
               onClick={(e) => handleNavClick(e, 'faq')}
               className={`hover:text-white transition-colors ${currentPage === 'faq' ? 'text-white' : ''}`}
@@ -219,37 +230,53 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage, isMuted, onTog
                 <a href="#family-plan" onClick={(e) => handleNavClick(e, 'family-plan')} className="block text-xl text-white py-2">Family Plan</a>
               </div>
 
+              <a href="#retreats" onClick={(e) => handleNavClick(e, 'retreats')} className="text-2xl text-white font-light">Retreats</a>
               <a href="#faq" onClick={(e) => handleNavClick(e, 'faq')} className="text-2xl text-white font-light">FAQs</a>
 
               {/* Login/Signup/Dashboard/Logout buttons - hidden on instructor page */}
-              {!isInstructorPage && (isAdmin || user) && (
+              {!isInstructorPage && (
                 <div className="flex flex-col gap-4 mt-4">
-                  {(isAdmin || user) && (
-                    <button
-                      onClick={() => {
-                        setIsOpen(false);
-                        navigate(isAdmin ? '/teacher-dashboard' : '/dashboard');
-                      }}
-                      className="w-full px-6 py-4 rounded-full bg-white/5 border border-white/10 text-white text-lg font-semibold hover:bg-white/10 transition-all"
-                    >
-                      Dashboard
-                    </button>
-                  )}
-                  {(isAdmin || user) && (
-                    <button
-                      onClick={() => {
-                        setIsOpen(false);
-                        if (isAdmin) {
-                          localStorage.removeItem('adminToken');
-                          navigate('/sign-in');
-                        } else {
-                          logout();
-                        }
-                      }}
-                      className="w-full px-6 py-4 rounded-full bg-white text-stone-900 text-lg font-semibold hover:bg-stone-200 transition-all"
-                    >
-                      Logout
-                    </button>
+                  {(!isAdmin && !user) ? (
+                    <>
+                      <button
+                        onClick={() => { setIsOpen(false); navigate('/sign-in'); }}
+                        className="w-full px-6 py-4 rounded-full bg-white/5 border border-white/10 text-white text-lg font-semibold hover:bg-white/10 transition-all"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={() => { setIsOpen(false); navigate('/sign-up'); }}
+                        className="w-full px-6 py-4 rounded-full bg-white text-stone-900 text-lg font-semibold hover:bg-stone-200 transition-all"
+                      >
+                        Sign Up
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate(isAdmin ? '/teacher-dashboard' : '/dashboard');
+                        }}
+                        className="w-full px-6 py-4 rounded-full bg-white/5 border border-white/10 text-white text-lg font-semibold hover:bg-white/10 transition-all"
+                      >
+                        Dashboard
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          if (isAdmin) {
+                            localStorage.removeItem('adminToken');
+                            navigate('/sign-in');
+                          } else {
+                            logout();
+                          }
+                        }}
+                        className="w-full px-6 py-4 rounded-full bg-white text-stone-900 text-lg font-semibold hover:bg-stone-200 transition-all"
+                      >
+                        Logout
+                      </button>
+                    </>
                   )}
                 </div>
               )}

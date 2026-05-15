@@ -3,32 +3,35 @@ import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import PageTransition from './components/PageTransition';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import HowItWorksSection from './components/HowItWorksSection';
-import HotspotSection from './components/HotspotSection';
-import TestimonialsSection from './components/TestimonialsSection';
-import Footer from './components/Footer';
-import Loader from './components/Loader';
-import InstructorPage from './components/InstructorPage';
-import PersonalYogaPage from './components/PersonalYogaPage';
-import FAQPage from './components/FAQPage';
-import WhatWeOffer from './components/WhatWeOffer';
-import GroupOfferingsPage from './components/GroupOfferingsPage';
-import FamilyPlanPage from './components/FamilyPlanPage';
-import WhatsAppButton from './components/WhatsAppButton';
-import CalendarButton from './components/CalendarButton';
-import SignInPage from './components/auth/SignInPage';
-import SignUpPage from './components/auth/SignUpPage';
-import Dashboard from './components/Dashboard';
-import SmoothScroll from './components/SmoothScroll';
-import ContactPopup from './components/ContactPopup';
 import { BookingProvider, useBooking } from './context/BookingContext';
-import ScheduleModal from './components/ScheduleModal';
-import ScrollToTop from './components/ScrollToTop';
-import QuestionnairePage from './components/QuestionnairePage';
-import NotFoundPage from './components/NotFoundPage';
-import TeacherDashboard from './components/admin/TeacherDashboard';
+const Navbar = React.lazy(() => import('./components/Navbar'));
+const Hero = React.lazy(() => import('./components/Hero'));
+const HowItWorksSection = React.lazy(() => import('./components/HowItWorksSection'));
+const HotspotSection = React.lazy(() => import('./components/HotspotSection'));
+const TestimonialsSection = React.lazy(() => import('./components/TestimonialsSection'));
+const Footer = React.lazy(() => import('./components/Footer'));
+const Loader = React.lazy(() => import('./components/Loader'));
+const InstructorPage = React.lazy(() => import('./components/InstructorPage'));
+const PersonalYogaPage = React.lazy(() => import('./components/PersonalYogaPage'));
+const FAQPage = React.lazy(() => import('./components/FAQPage'));
+const WhatWeOffer = React.lazy(() => import('./components/WhatWeOffer'));
+const GroupOfferingsPage = React.lazy(() => import('./components/GroupOfferingsPage'));
+const FamilyPlanPage = React.lazy(() => import('./components/FamilyPlanPage'));
+const RetreatsPage = React.lazy(() => import('./components/RetreatsPage'));
+const WhatsAppButton = React.lazy(() => import('./components/WhatsAppButton'));
+const CalendarButton = React.lazy(() => import('./components/CalendarButton'));
+const SignInPage = React.lazy(() => import('./components/auth/SignInPage'));
+const SignUpPage = React.lazy(() => import('./components/auth/SignUpPage'));
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const SmoothScroll = React.lazy(() => import('./components/SmoothScroll'));
+const ContactPopup = React.lazy(() => import('./components/ContactPopup'));
+const ScheduleModal = React.lazy(() => import('./components/ScheduleModal'));
+const ScrollToTop = React.lazy(() => import('./components/ScrollToTop'));
+const QuestionnairePage = React.lazy(() => import('./components/QuestionnairePage'));
+const NotFoundPage = React.lazy(() => import('./components/NotFoundPage'));
+const TeacherDashboard = React.lazy(() => import('./components/admin/TeacherDashboard'));
+
+const FallbackLoader = () => <div className="h-screen w-screen bg-black flex items-center justify-center"><div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div></div>;
 
 const TopRightAuth: React.FC<{ hidden: boolean }> = ({ hidden }) => {
   const { user, logout } = useAuth();
@@ -48,7 +51,7 @@ const TopRightAuth: React.FC<{ hidden: boolean }> = ({ hidden }) => {
       }}
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.35, ease: "easeInOut" }}
-      className="fixed top-6 right-6 z-50 flex items-center gap-3 pointer-events-auto"
+      className="fixed top-6 right-6 z-50 flex items-center gap-3 pointer-events-auto max-md:hidden"
     >
       {!user && !isAdmin ? (
         <>
@@ -268,28 +271,31 @@ const AppInner: React.FC = () => {
         <main className={`w-full ${location.pathname === '/' ? 'bg-transparent' : isAuthPage ? 'bg-black' : 'bg-stone-50'}`}>
           <ScrollToTop />
           <AnimatePresence mode="wait">
-            <Routes location={location}>
-              <Route path="/" element={
-                <PageTransition>
-                  <Hero isMuted={isMuted} />
-                  <WhatWeOffer />
-                  <HowItWorksSection />
-                  <HotspotSection />
-                  <TestimonialsSection />
-                </PageTransition>
-              } />
-              <Route path="/instructor" element={<PageTransition><InstructorPage /></PageTransition>} />
-              <Route path="/personal-yoga" element={<PageTransition><PersonalYogaPage /></PageTransition>} />
-              <Route path="/faq" element={<PageTransition><FAQPage /></PageTransition>} />
-              <Route path="/group-offerings" element={<PageTransition><GroupOfferingsPage /></PageTransition>} />
-              <Route path="/family-plan" element={<PageTransition><FamilyPlanPage /></PageTransition>} />
-              <Route path="/sign-in/*" element={<PageTransition><SignInPage /></PageTransition>} />
-              <Route path="/sign-up/*" element={<PageTransition><SignUpPage /></PageTransition>} />
-              <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-              <Route path="/teacher-dashboard" element={<PageTransition><TeacherDashboard /></PageTransition>} />
-              <Route path="/questionnaire" element={<ProtectedRoute><PageTransition><QuestionnairePage /></PageTransition></ProtectedRoute>} />
-              <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
-            </Routes>
+            <React.Suspense fallback={<FallbackLoader />}>
+              <Routes location={location}>
+                <Route path="/" element={
+                  <PageTransition>
+                    <Hero isMuted={isMuted} />
+                    <WhatWeOffer />
+                    <HowItWorksSection />
+                    <HotspotSection />
+                    <TestimonialsSection />
+                  </PageTransition>
+                } />
+                <Route path="/instructor" element={<PageTransition><InstructorPage /></PageTransition>} />
+                <Route path="/personal-yoga" element={<PageTransition><PersonalYogaPage /></PageTransition>} />
+                <Route path="/faq" element={<PageTransition><FAQPage /></PageTransition>} />
+                <Route path="/group-offerings" element={<PageTransition><GroupOfferingsPage /></PageTransition>} />
+                <Route path="/family-plan" element={<PageTransition><FamilyPlanPage /></PageTransition>} />
+                <Route path="/retreats" element={<PageTransition><RetreatsPage /></PageTransition>} />
+                <Route path="/sign-in/*" element={<PageTransition><SignInPage /></PageTransition>} />
+                <Route path="/sign-up/*" element={<PageTransition><SignUpPage /></PageTransition>} />
+                <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
+                <Route path="/teacher-dashboard" element={<PageTransition><TeacherDashboard /></PageTransition>} />
+                <Route path="/questionnaire" element={<ProtectedRoute><PageTransition><QuestionnairePage /></PageTransition></ProtectedRoute>} />
+                <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
+              </Routes>
+            </React.Suspense>
           </AnimatePresence>
           {!['/sign-in', '/sign-up', '/dashboard', '/teacher-dashboard', '/group-offerings', '/personal-yoga', '/family-plan', '/questionnaire'].some(path => location.pathname.startsWith(path)) && location.pathname !== '*' && !['/404'].includes(location.pathname) && <Footer />}
         </main>

@@ -6,8 +6,9 @@ import { API_BASE } from '../../lib/api';
 
 const TeacherDashboard: React.FC = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'overview' | 'customerDetails'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'customerDetails' | 'leads'>('overview');
     const [customers, setCustomers] = useState<any[]>([]);
+    const [leads, setLeads] = useState<any[]>([]);
     const [selectedCustomerEmail, setSelectedCustomerEmail] = useState<string | null>(null);
     const [customerDetail, setCustomerDetail] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -44,6 +45,26 @@ const TeacherDashboard: React.FC = () => {
             setLoading(false);
         }
     }, [handleLogout]);
+    
+    const fetchLeads = useCallback(async (token: string) => {
+        setLoading(true);
+        setError('');
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/leads`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setLeads(data.data);
+            } else {
+                setError(data.message || 'Failed to fetch leads');
+            }
+        } catch (err) {
+            setError('Error connecting to server while fetching leads');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         const token = localStorage.getItem('adminToken');
@@ -203,13 +224,32 @@ const TeacherDashboard: React.FC = () => {
                             >
                                 Overview
                             </button>
+                            <button
+                                onClick={() => { 
+                                    setActiveTab('leads'); 
+                                    setSelectedCustomerEmail(null); 
+                                    setError('');
+                                    const t = localStorage.getItem('adminToken');
+                                    if (t) fetchLeads(t);
+                                }}
+                                className={`px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${activeTab === 'leads' ? 'bg-white text-black shadow-lg' : 'text-stone-400 hover:text-white hover:bg-white/5'}`}
+                            >
+                                Leads
+                            </button>
                             {selectedCustomerEmail && (
                                 <button className="px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest bg-white text-black shadow-lg">
                                     Student Detail
                                 </button>
                             )}
                             <button
-                                onClick={() => { const t = localStorage.getItem('adminToken'); if (t) fetchCustomers(t); setError(''); }}
+                                onClick={() => { 
+                                    const t = localStorage.getItem('adminToken'); 
+                                    if (t) {
+                                        if (activeTab === 'overview') fetchCustomers(t);
+                                        if (activeTab === 'leads') fetchLeads(t);
+                                    }
+                                    setError(''); 
+                                }}
                                 title="Refresh list"
                                 className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest bg-white text-black shadow-lg hover:bg-stone-200 transition-all duration-300"
                             >
@@ -269,7 +309,7 @@ const TeacherDashboard: React.FC = () => {
                                                     </thead>
                                                     <tbody className="divide-y divide-white/5">
                                                         {customers.map((c) => (
-                                                            <tr key={c.id} className="group hover:bg-white/[0.02] transition-colors">
+                                                            <tr key={c.email} className="group hover:bg-white/[0.02] transition-colors">
                                                                 <td className="px-8 py-6">
                                                                     <div className="flex items-center gap-4">
                                                                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-stone-500 to-stone-700 flex items-center justify-center text-xs font-bold">
@@ -317,6 +357,78 @@ const TeacherDashboard: React.FC = () => {
                                                             <tr>
                                                                 <td colSpan={4} className="px-8 py-20 text-center text-stone-500">
                                                                     No students yet. New signups and bookings will appear here in real-time.
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === 'leads' && (
+                                    <motion.div
+                                        key="leads"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -20 }}
+                                        className="space-y-6"
+                                    >
+                                        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-2xl overflow-hidden">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left">
+                                                    <thead>
+                                                        <tr className="border-b border-white/5">
+                                                            <th className="px-8 py-6 text-xs font-bold text-stone-500 uppercase tracking-[0.2em]">Lead</th>
+                                                            <th className="px-8 py-6 text-xs font-bold text-stone-500 uppercase tracking-[0.2em]">Contact</th>
+                                                            <th className="px-8 py-6 text-xs font-bold text-stone-500 uppercase tracking-[0.2em]">Inquiry Date</th>
+                                                            <th className="px-8 py-6 text-xs font-bold text-stone-500 uppercase tracking-[0.2em] text-right">Details</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-white/5">
+                                                        {leads.map((l) => (
+                                                            <tr key={l.id} className="group hover:bg-white/[0.02] transition-colors">
+                                                                <td className="px-8 py-6">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-700/20 border border-emerald-500/30 flex items-center justify-center text-xs font-bold text-emerald-400">
+                                                                            {l.firstName?.charAt(0)}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-bold tracking-wide text-white">{l.firstName} {l.lastName}</p>
+                                                                            <p className="text-xs text-stone-500 italic">{l.yogaExperience} • {l.gender}, {l.age}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-8 py-6">
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-stone-300">
+                                                                            <Mail className="w-3.5 h-3.5 text-stone-600" />
+                                                                            <span className="text-xs">{l.email}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 text-stone-300">
+                                                                            <span className="text-[10px] font-bold text-emerald-500/60 uppercase">WhatsApp</span>
+                                                                            <span className="text-xs">{l.phone}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-8 py-6">
+                                                                    <span className="text-xs text-stone-400">
+                                                                        {new Date(l.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-8 py-6 text-right">
+                                                                    <div className="flex flex-col items-end gap-1">
+                                                                        <p className="text-[10px] text-stone-500 uppercase font-bold tracking-widest">Goal</p>
+                                                                        <p className="text-xs text-white max-w-[200px] truncate">{l.healthGoals || 'Not specified'}</p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                        {leads.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan={4} className="px-8 py-20 text-center text-stone-500">
+                                                                    No inquiries yet. New form submissions will appear here.
                                                                 </td>
                                                             </tr>
                                                         )}

@@ -15,8 +15,8 @@ const Footer: React.FC = () => {
 
                     {/* Left Column: Heading & Description */}
                     <div className="max-w-4xl">
-                        <h2 className="text-5xl md:text-7xl font-sans font-normal tracking-tight leading-[1.1] mb-8">
-                            <span className="whitespace-nowrap">One Decision Can Change</span> <br />
+                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-sans font-normal tracking-tight leading-[1.1] mb-8">
+                            <span className="md:whitespace-nowrap">One Decision Can Change</span> <br className="hidden md:block" />
                             Your <span className="font-serif italic">Life</span>
                         </h2>
                         <p className="text-stone-400 font-light text-base leading-relaxed max-w-md">
@@ -25,17 +25,17 @@ const Footer: React.FC = () => {
                     </div>
 
                     {/* Right Column: Contact & Social Info */}
-                    <div className="flex flex-col items-end text-right gap-12">
+                    <div className="flex flex-col md:items-end md:text-right gap-12 max-md:items-center max-md:text-center w-full">
                         {/* Email section */}
                         <div>
                             <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-bold mb-2">Email Us</p>
-                            <a href="mailto: yogsamskara02@gmail.com" className="text-2xl md:text-3xl font-serif italic text-white hover:text-stone-300 transition-colors">
+                            <a href="mailto: yogsamskara02@gmail.com" className="text-[6.5vw] md:text-3xl font-serif italic text-white hover:text-stone-300 transition-colors max-md:break-all">
                                 yogsamskara02@gmail.com
                             </a>
                         </div>
 
                         {/* Social Icons section (Replacing VISIT US) */}
-                        <div className="flex flex-col items-end">
+                        <div className="flex flex-col md:items-end items-center">
                             <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-bold mb-4">Follow Us</p>
                             <div className="flex gap-4">
                                 <a href="https://facebook.com/yogsamskara" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all text-stone-400">

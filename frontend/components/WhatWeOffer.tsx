@@ -74,10 +74,10 @@ const WhatWeOffer: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 }}
-                    className="text-3xl md:text-5xl lg:text-6xl font-light text-center leading-tight max-w-4xl mb-20"
+                    className="text-3xl md:text-5xl lg:text-6xl font-light text-center leading-tight max-w-4xl mb-20 inline-block"
                 >
-                    <span className="font-serif italic pr-2" style={{ color: '#C01823', textShadow: '0 0 5px #C01823' }}>Spaces</span>
-                    to breathe, move, and come home to yourself.
+                    <span className="font-serif italic pr-2 text-[1.4em] align-baseline" style={{ color: '#C01823', textShadow: '0 0 5px #C01823' }}>Spaces</span>
+                    <span className="align-baseline">to breathe, move, and come home to yourself.</span>
                 </motion.div>
 
                 {/* Cards Grid */}
@@ -89,7 +89,7 @@ const WhatWeOffer: React.FC = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.3 + (index * 0.1) }}
-                            className="group relative h-[600px] rounded-[2rem] overflow-hidden cursor-pointer"
+                            className="group relative h-[350px] md:h-[600px] rounded-[2rem] overflow-hidden cursor-pointer"
                             onClick={() => navigate(offer.link)}
                         >
                             {/* Background Image */}
@@ -99,7 +99,7 @@ const WhatWeOffer: React.FC = () => {
                                     alt={offer.title}
                                     loading="lazy"
                                     decoding="async"
-                                    className="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-110"
+                                    className="w-full h-full object-cover object-top transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-110"
                                 />
                                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
                             </div>
@@ -128,7 +128,7 @@ const WhatWeOffer: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.6 }}
-                    className="px-[42px] py-[21px] bg-white/5 backdrop-blur-xl border border-white/20 rounded-full text-[13px] md:text-[15px] uppercase tracking-[0.15em] hover:bg-white hover:text-stone-900 transition-all duration-500 flex items-center gap-3 group"
+                    className="px-[42px] py-[21px] bg-white/5 backdrop-blur-xl border border-white/20 rounded-full text-[13px] md:text-[15px] uppercase tracking-[0.15em] hover:bg-white hover:text-stone-900 transition-all duration-500 flex items-center justify-center gap-3 group max-md:px-4 max-md:py-5 max-md:text-[11px] max-md:flex-row w-[90%] md:w-auto mx-auto"
                     onClick={() => window.open('https://wa.me/919399441405?text=I\'d%20like%20to%20book%20a%20free%2030-min%20consultation', '_blank')}
                 >
                     Book - 30 Min Free Consultation!

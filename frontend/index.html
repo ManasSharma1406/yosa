@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <!-- Force Desktop View on Mobile by setting a fixed width -->
-  <meta name="viewport" content="width=1280" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
   <!-- SEO Meta Tags -->
   <title>YogSamskara | Authentic Yoga & Holistic Wellness</title>
   <meta name="description" content="YogSamskara offers authentic, traditional yoga rooted in the 5 Koshas. Join our 1:1 personal yoga therapy, premium group classes, and family wellness plans to balance your mind, body, and spirit." />
@@ -125,30 +125,7 @@
       -ms-overflow-style: none;
     }
 
-    /* Device Restriction Overlay */
-    @media (max-width: 767px) {
-      body::before {
-        content: "Experience YOG-SAMSKARA on Desktop or Tablet";
-        position: fixed;
-        inset: 0;
-        background: #0B0B0D;
-        color: white;
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 2rem;
-        font-family: 'Playfair Display', serif;
-        font-style: italic;
-        font-size: 1.5rem;
-        letter-spacing: 0.05em;
-      }
 
-      #root {
-        display: none !important;
-      }
-    }
   </style>
   <script type="importmap">
 {
