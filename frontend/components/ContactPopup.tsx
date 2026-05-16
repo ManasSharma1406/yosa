@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react';
 import axios from 'axios';
-import { auth } from '../lib/firebase';
-
 interface ContactPopupProps {
     isOpen: boolean;
     onClose: () => void;
@@ -28,23 +26,18 @@ const ContactPopup: React.FC<ContactPopupProps> = ({ isOpen, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Never show to logged-in users
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-            if (user) {
-                setIsVisible(false);
-                return;
-            }
-            // Check if already submitted
+        if (isOpen) {
             const isSubmitted = localStorage.getItem('yosa_lead_submitted');
             if (!isSubmitted) {
-                const timer = setTimeout(() => {
-                    setIsVisible(true);
-                }, 2000);
-                return () => clearTimeout(timer);
+                setIsVisible(true);
+            } else {
+                // If it was already submitted but App.tsx tried to open it, close it immediately
+                onClose();
             }
-        });
-        return () => unsubscribe();
-    }, []);
+        } else {
+            setIsVisible(false);
+        }
+    }, [isOpen, onClose]);
 
     useEffect(() => {
         if (isVisible) {
@@ -93,7 +86,12 @@ const ContactPopup: React.FC<ContactPopupProps> = ({ isOpen, onClose }) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => status === 'success' ? null : setIsVisible(false)}
+                        onClick={() => {
+                            if (status !== 'success') {
+                                setIsVisible(false);
+                                onClose();
+                            }
+                        }}
                         className="fixed inset-0 bg-black/95 backdrop-blur-xl"
                     />
 
@@ -108,7 +106,10 @@ const ContactPopup: React.FC<ContactPopupProps> = ({ isOpen, onClose }) => {
                             {/* Close Button - Disabled after success */}
                             {status !== 'success' && (
                                 <button
-                                    onClick={() => setIsVisible(false)}
+                                    onClick={() => {
+                                        setIsVisible(false);
+                                        onClose();
+                                    }}
                                     className="absolute top-4 right-4 md:top-6 md:right-8 p-2 text-stone-500 hover:text-white transition-colors z-[210] bg-black/50 rounded-full md:bg-transparent"
                                 >
                                     <X className="w-5 h-5 md:w-6 md:h-6" />
