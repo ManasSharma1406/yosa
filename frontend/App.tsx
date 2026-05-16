@@ -4,6 +4,7 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import PageTransition from './components/PageTransition';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { BookingProvider, useBooking } from './context/BookingContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 const Navbar = React.lazy(() => import('./components/Navbar'));
 const Hero = React.lazy(() => import('./components/Hero'));
 const HowItWorksSection = React.lazy(() => import('./components/HowItWorksSection'));
@@ -109,9 +110,11 @@ const App: React.FC = () => {
   return (
     <SmoothScroll>
       <AuthProvider>
-        <BookingProvider>
-          <AppInner />
-        </BookingProvider>
+        <CurrencyProvider>
+          <BookingProvider>
+            <AppInner />
+          </BookingProvider>
+        </CurrencyProvider>
       </AuthProvider>
     </SmoothScroll>
   );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Clock, Heart, ArrowRight, Sparkles, Wind, Activity } from 'lucide-react';
 import ScheduleModal from './ScheduleModal';
+import { useCurrency } from '../context/CurrencyContext';
 
 // Section 2 Data
 const whyData = [
@@ -49,6 +50,7 @@ const therapyAreas = [
 const PersonalYogaPage: React.FC = () => {
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string>('');
+    const { formatPrice } = useCurrency();
 
     const handleBookNow = (planName: string) => {
         setSelectedPlan(planName);
@@ -210,8 +212,8 @@ const PersonalYogaPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">Drop-In</h3>
                         <p className="text-stone-500 text-sm mb-6">1 Session</p>
-                        <div className="text-4xl font-light mb-2 text-white">$25</div>
-                        <p className="text-stone-500 text-xs mb-6">$25 / session</p>
+                        <div className="text-4xl font-light mb-2 text-white">{formatPrice(25)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(25)} / session</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> One-on-one guidance</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Personalized session</li>
@@ -232,8 +234,8 @@ const PersonalYogaPage: React.FC = () => {
                         </div>
                         <h3 className="text-xl font-poppins mb-2">4-Week Journey</h3>
                         <p className="text-stone-500 text-sm mb-6">8 Sessions · 4 Weeks</p>
-                        <div className="text-4xl font-light mb-2">$190</div>
-                        <p className="text-stone-500 text-xs mb-6">$23.75 / session</p>
+                        <div className="text-4xl font-light mb-2">{formatPrice(190)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(190)} / 8 sessions</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-700"><Check className="w-4 h-4 shrink-0" /> Personalized weekly plan</li>
                             <li className="flex gap-3 text-sm text-stone-700"><Check className="w-4 h-4 shrink-0" /> Progress tracking</li>
@@ -251,8 +253,8 @@ const PersonalYogaPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">Deep Foundation</h3>
                         <p className="text-stone-500 text-sm mb-6">12 Sessions · 4 Weeks</p>
-                        <div className="text-4xl font-light mb-2 text-white">$270</div>
-                        <p className="text-stone-500 text-xs mb-6">$22.50 / session</p>
+                        <div className="text-4xl font-light mb-2 text-white">{formatPrice(270)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(270)} / 12 sessions</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Therapeutic sequences</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Breathwork & meditation</li>
@@ -270,8 +272,8 @@ const PersonalYogaPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">Transformation</h3>
                         <p className="text-stone-500 text-sm mb-6">16 Sessions · 4 Weeks</p>
-                        <div className="text-4xl font-light mb-2 text-white">$340</div>
-                        <p className="text-stone-500 text-xs mb-6">$21.25 / session</p>
+                        <div className="text-4xl font-light mb-2 text-white">{formatPrice(340)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(340)} / 16 sessions</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Comprehensive plan</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Alignment & therapy focus</li>
@@ -289,8 +291,8 @@ const PersonalYogaPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">Total Immersion</h3>
                         <p className="text-stone-500 text-sm mb-6">20 Sessions · 4 Weeks</p>
-                        <div className="text-4xl font-light mb-2 text-white">$400</div>
-                        <p className="text-stone-500 text-xs mb-6">$20 / session</p>
+                        <div className="text-4xl font-light mb-2 text-white">{formatPrice(400)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(400)} / 20 sessions</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Maximum savings</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Daily practice support</li>
@@ -311,11 +313,11 @@ const PersonalYogaPage: React.FC = () => {
                     <h4 className="text-center font-poppins text-white text-xl mb-6">Optional Add-ons</h4>
                     <div className="flex flex-col md:flex-row justify-center gap-8 text-stone-300 text-sm">
                         <div className="flex justify-between md:block w-full text-center">
-                            <span>Guided Body Scan Meditation:</span> <span className="font-bold text-white ml-2">$12 / session</span>
+                            <span>Guided Body Scan Meditation:</span> <span className="font-bold text-white ml-2">{formatPrice(12)} / session</span>
                         </div>
                         <div className="hidden md:block w-[1px] bg-white/10 h-6"></div>
                         <div className="flex justify-between md:block w-full text-center">
-                            <span>Breathwork & Nervous System Reset:</span> <span className="font-bold text-white ml-2">$18 / session</span>
+                            <span>Breathwork & Nervous System Reset:</span> <span className="font-bold text-white ml-2">{formatPrice(18)} / session</span>
                         </div>
                     </div>
                 </div>

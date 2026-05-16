@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Users, Zap, Star } from 'lucide-react';
 import ScheduleModal from './ScheduleModal';
+import { useCurrency } from '../context/CurrencyContext';
 
 const whyGroup = [
     {
@@ -24,6 +25,7 @@ const whyGroup = [
 const GroupOfferingsPage: React.FC = () => {
     const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<string>('');
+    const { formatPrice } = useCurrency();
 
     const handleBookNow = (planName: string) => {
         setSelectedPlan(planName);
@@ -126,8 +128,8 @@ const GroupOfferingsPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">Drop-In Class</h3>
                         <p className="text-stone-500 text-sm mb-4">Single session</p>
-                        <div className="text-5xl font-light mb-1 text-white">$10</div>
-                        <p className="text-stone-500 text-xs mb-6">$10 / class</p>
+                        <div className="text-5xl font-light mb-1 text-white">{formatPrice(10)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(10)} / class</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> No commitment required</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> All levels welcome</li>
@@ -148,8 +150,8 @@ const GroupOfferingsPage: React.FC = () => {
                         </div>
                         <h3 className="text-xl font-poppins mb-2">10 Class Pack</h3>
                         <p className="text-stone-500 text-sm mb-4">10 sessions</p>
-                        <div className="text-5xl font-light mb-1">$85</div>
-                        <p className="text-stone-500 text-xs mb-6">$8.50 / class</p>
+                        <div className="text-5xl font-light mb-1">{formatPrice(85)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(85)} / 10 classes</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-700"><Check className="w-4 h-4 shrink-0" /> Save $15 vs drop-in</li>
                             <li className="flex gap-3 text-sm text-stone-700"><Check className="w-4 h-4 shrink-0" /> Flexible scheduling</li>
@@ -167,8 +169,8 @@ const GroupOfferingsPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">20 Class Pack</h3>
                         <p className="text-stone-500 text-sm mb-4">20 sessions</p>
-                        <div className="text-5xl font-light mb-1 text-white">$150</div>
-                        <p className="text-stone-500 text-xs mb-6">$7.50 / class</p>
+                        <div className="text-5xl font-light mb-1 text-white">{formatPrice(150)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(150)} / 20 classes</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Maximum savings</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Full month commitment</li>
@@ -207,8 +209,8 @@ const GroupOfferingsPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">Drop-In</h3>
                         <p className="text-stone-500 text-sm mb-4">Single session</p>
-                        <div className="text-5xl font-light mb-1 text-white">$18</div>
-                        <p className="text-stone-500 text-xs mb-6">$18 / class</p>
+                        <div className="text-5xl font-light mb-1 text-white">{formatPrice(18)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(18)} / class</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Max 5 members per class</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Semi-personalized attention</li>
@@ -229,8 +231,8 @@ const GroupOfferingsPage: React.FC = () => {
                         </div>
                         <h3 className="text-xl font-poppins mb-2">8-Session Pack</h3>
                         <p className="text-stone-500 text-sm mb-4">8 sessions</p>
-                        <div className="text-5xl font-light mb-1">$135</div>
-                        <p className="text-stone-500 text-xs mb-6">$16.88 / session</p>
+                        <div className="text-5xl font-light mb-1">{formatPrice(135)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(135)} / 8 sessions</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-700"><Check className="w-4 h-4 shrink-0" /> Dedicated spot reserved</li>
                             <li className="flex gap-3 text-sm text-stone-700"><Check className="w-4 h-4 shrink-0" /> Progress-focused structure</li>
@@ -248,8 +250,8 @@ const GroupOfferingsPage: React.FC = () => {
                     <div className="bg-white/5 p-8 rounded-3xl border border-white/10 flex flex-col backdrop-blur-md hover:border-white/20 transition-all duration-300 h-full">
                         <h3 className="text-xl font-poppins text-white mb-2">12-Session Pack</h3>
                         <p className="text-stone-500 text-sm mb-4">12 sessions</p>
-                        <div className="text-5xl font-light mb-1 text-white">$180</div>
-                        <p className="text-stone-500 text-xs mb-6">$15 / session</p>
+                        <div className="text-5xl font-light mb-1 text-white">{formatPrice(180)}</div>
+                        <p className="text-stone-500 text-xs mb-6">{formatPrice(180)} / 12 sessions</p>
                         <ul className="space-y-3 mb-8 flex-1">
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Maximum savings</li>
                             <li className="flex gap-3 text-sm text-stone-400"><Check className="w-4 h-4 shrink-0" /> Extended premium access</li>

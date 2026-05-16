@@ -7,6 +7,7 @@ import {
 import { auth } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useCurrency } from '../context/CurrencyContext';
 
 interface ScheduleModalProps {
     isOpen: boolean;
@@ -58,10 +59,12 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
 
     const navigate = useNavigate();
     const { getIdToken, user } = useAuth();
+    const { currencyCode, symbol, calculatePrice, formatPrice } = useCurrency();
 
     const planPrice = selectedPlan ? (PLAN_PRICE_MAP[selectedPlan] ?? 0) : 0;
-    const addonsTotal = ADDONS.filter(a => selectedAddons.includes(a.id)).reduce((sum, a) => sum + a.price, 0);
-    const subtotal = planPrice + addonsTotal;
+    const localPlanPrice = calculatePrice(planPrice);
+    const addonsTotal = ADDONS.filter(a => selectedAddons.includes(a.id)).reduce((sum, a) => sum + calculatePrice(a.price), 0);
+    const subtotal = localPlanPrice + addonsTotal;
     const discountAmount = appliedPromo ? (subtotal * appliedPromo.discountPercentage) / 100 : 0;
     const totalToPay = Math.max(0, subtotal - discountAmount);
 
@@ -191,7 +194,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                 body: JSON.stringify({
                     amount: totalToPay,
                     planName: selectedPlan,
-                    currency: 'USD',
+                    currency: currencyCode,
                     userId: user?.uid || 'guest',
                     promoCode: appliedPromo?.code
                 }),
@@ -350,7 +353,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 <h3 className="text-xl font-bold text-slate-900 mb-2 font-poppins not-italic">1:1 Private Session</h3>
                                                 <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1 font-poppins not-italic">Personalized guidance tailored to your unique body, goals, and healing journey.</p>
                                                 <div className="flex items-center gap-2 text-black font-bold text-xs uppercase tracking-widest mt-auto font-poppins not-italic">
-                                                    Starting from $25 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                    Starting from {formatPrice(25)} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </div>
                                             </button>
 
@@ -364,7 +367,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 <h3 className="text-xl font-bold text-slate-900 mb-2 font-poppins not-italic">Group Plans</h3>
                                                 <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1 font-poppins not-italic">Connect and grow with others in our intimate regular or premium small group sessions.</p>
                                                 <div className="flex items-center gap-2 text-black font-bold text-xs uppercase tracking-widest mt-auto font-poppins not-italic">
-                                                    Starting from $10 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                    Starting from {formatPrice(10)} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </div>
                                             </button>
 
@@ -378,7 +381,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 <h3 className="text-xl font-bold text-slate-900 mb-2 font-poppins not-italic">Family Plan</h3>
                                                 <p className="text-stone-500 text-sm leading-relaxed mb-6 flex-1 font-poppins not-italic">Wellness for the whole household. Shared sessions with a dedicated teacher.</p>
                                                 <div className="flex items-center gap-2 text-black font-bold text-xs uppercase tracking-widest mt-auto font-poppins not-italic">
-                                                    Starting from $650 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                                    Starting from {formatPrice(650)} <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                 </div>
                                             </button>
                                         </motion.div>
@@ -403,11 +406,11 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-poppins">
                                                 {selectedOffering === 'private' && [
-                                                    { name: 'Drop-In', details: '1 Session', price: '$25' },
-                                                    { name: '4-Week Journey', details: '8 Sessions · 4 Weeks', price: '$190' },
-                                                    { name: 'Deep Foundation', details: '12 Sessions · 4 Weeks', price: '$270' },
-                                                    { name: 'Transformation', details: '16 Sessions · 4 Weeks', price: '$340' },
-                                                    { name: 'Total Immersion', details: '20 Sessions · 4 Weeks', price: '$400' }
+                                                    { name: 'Drop-In', details: '1 Session', price: formatPrice(25) },
+                                                    { name: '4-Week Journey', details: '8 Sessions · 4 Weeks', price: formatPrice(190) },
+                                                    { name: 'Deep Foundation', details: '12 Sessions · 4 Weeks', price: formatPrice(270) },
+                                                    { name: 'Transformation', details: '16 Sessions · 4 Weeks', price: formatPrice(340) },
+                                                    { name: 'Total Immersion', details: '20 Sessions · 4 Weeks', price: formatPrice(400) }
                                                 ].map((p) => (
                                                     <button
                                                         key={p.name}
@@ -421,12 +424,12 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 ))}
 
                                                 {selectedOffering === 'group' && [
-                                                    { name: 'Group Drop-In', details: 'Single session', price: '$10' },
-                                                    { name: '10 Class Pack', details: '10 sessions · Valid 1 mo', price: '$85' },
-                                                    { name: '20 Class Pack', details: '20 sessions · Max savings', price: '$150' },
-                                                    { name: 'Premium Small Drop-In', details: 'Max 5 members', price: '$18' },
-                                                    { name: 'Premium 8-Session Pack', details: 'Intimate setting', price: '$135' },
-                                                    { name: 'Premium 12-Session Pack', details: 'Priority booking', price: '$180' }
+                                                    { name: 'Group Drop-In', details: 'Single session', price: formatPrice(10) },
+                                                    { name: '10 Class Pack', details: '10 sessions · Valid 1 mo', price: formatPrice(85) },
+                                                    { name: '20 Class Pack', details: '20 sessions · Max savings', price: formatPrice(150) },
+                                                    { name: 'Premium Small Drop-In', details: 'Max 5 members', price: formatPrice(18) },
+                                                    { name: 'Premium 8-Session Pack', details: 'Intimate setting', price: formatPrice(135) },
+                                                    { name: 'Premium 12-Session Pack', details: 'Priority booking', price: formatPrice(180) }
                                                 ].map((p) => (
                                                     <button
                                                         key={p.name}
@@ -440,9 +443,9 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 ))}
 
                                                 {selectedOffering === 'family' && [
-                                                    { name: 'Family of 2', details: '2 Members · 2-mo validity', price: '$650' },
-                                                    { name: 'Family of 3', details: '3 Members · 2-mo validity', price: '$850' },
-                                                    { name: 'Family of 4', details: '4 Members · 2-mo validity', price: '$1,050' }
+                                                    { name: 'Family of 2', details: '2 Members · 2-mo validity', price: formatPrice(650) },
+                                                    { name: 'Family of 3', details: '3 Members · 2-mo validity', price: formatPrice(850) },
+                                                    { name: 'Family of 4', details: '4 Members · 2-mo validity', price: formatPrice(1050) }
                                                 ].map((p) => (
                                                     <button
                                                         key={p.name}
@@ -489,7 +492,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                             </p>
                                                         </div>
                                                         <span className="text-lg font-light text-slate-900">
-                                                            ${planPrice}
+                                                            {symbol}{localPlanPrice}
                                                         </span>
                                                     </div>
 
@@ -499,7 +502,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                             {ADDONS.filter(a => selectedAddons.includes(a.id)).map(addon => (
                                                                 <div key={addon.id} className="flex justify-between text-stone-500 text-sm">
                                                                     <span className="italic">{addon.name}</span>
-                                                                    <span>+${addon.price}</span>
+                                                                    <span>+{symbol}{calculatePrice(addon.price)}</span>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -509,7 +512,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                     {(selectedAddons.length > 0 || appliedPromo) && (
                                                         <div className="pt-4 border-t border-stone-100 flex justify-between items-center text-stone-600 font-medium">
                                                             <span>Subtotal</span>
-                                                            <span>${subtotal}</span>
+                                                            <span>{symbol}{subtotal}</span>
                                                         </div>
                                                     )}
 
@@ -520,7 +523,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                                 <span>Discount ({appliedPromo.discountPercentage}%)</span>
                                                                 <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider">{appliedPromo.code}</span>
                                                             </div>
-                                                            <span>-${discountAmount.toFixed(2)}</span>
+                                                            <span>-{symbol}{discountAmount.toFixed(2)}</span>
                                                         </div>
                                                     )}
 
@@ -588,7 +591,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                                 <span className="text-sm font-medium">{addon.name}</span>
                                                             </div>
                                                             <span className={`text-sm ${selectedAddons.includes(addon.id) ? 'text-stone-300' : 'text-stone-400'}`}>
-                                                                +${addon.price}
+                                                                +{symbol}{calculatePrice(addon.price)}
                                                             </span>
                                                             <input type="checkbox" className="hidden" checked={selectedAddons.includes(addon.id)} onChange={() => toggleAddon(addon.id)} />
                                                         </label>
@@ -632,7 +635,7 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                         {payLoading ? (
                                                             <><Loader2 className="w-5 h-5 animate-spin" /> Initiating Payment...</>
                                                         ) : (
-                                                            `Pay $${totalToPay} Now`
+                                                            `Pay ${symbol}${totalToPay} Now`
                                                         )}
                                                     </button>
                                                 )}
