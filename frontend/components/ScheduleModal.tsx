@@ -611,7 +611,17 @@ const ScheduleModal: React.FC<ScheduleModalProps> = ({ isOpen, onClose, initialP
                                                 </div>
 
                                                 {/* Pay/Confirm Button */}
-                                                {subLoading ? (
+                                                {!user ? (
+                                                    <button
+                                                        onClick={() => {
+                                                            onClose();
+                                                            navigate('/sign-in', { state: { returnTo: window.location.pathname } });
+                                                        }}
+                                                        className="w-full py-5 bg-black text-white rounded-2xl font-bold text-base tracking-wide hover:bg-stone-900 transition-all flex items-center justify-center shadow-xl shadow-stone-200"
+                                                    >
+                                                        Sign in to Book
+                                                    </button>
+                                                ) : subLoading ? (
                                                     <div className="w-full py-5 bg-stone-100/50 rounded-2xl flex items-center justify-center">
                                                         <Loader2 className="w-5 h-5 text-stone-400 animate-spin" />
                                                     </div>
