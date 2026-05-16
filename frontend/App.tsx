@@ -137,7 +137,12 @@ const AppInner: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (!loading && !user) {
+    const isExcludedPage = location.pathname.startsWith('/sign-in') || 
+                           location.pathname.startsWith('/sign-up') || 
+                           location.pathname.startsWith('/dashboard') || 
+                           location.pathname.startsWith('/teacher-dashboard');
+
+    if (!loading && !user && !isExcludedPage) {
       const hasShown = localStorage.getItem('contactPopupShown');
       if (!hasShown) {
         const timer = setTimeout(() => {
@@ -147,7 +152,7 @@ const AppInner: React.FC = () => {
         return () => clearTimeout(timer);
       }
     }
-  }, [loading, user]);
+  }, [loading, user, location.pathname]);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
