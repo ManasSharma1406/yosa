@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle2, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import { auth } from '../lib/firebase';
 
 interface ContactPopupProps {
     isOpen: boolean;
@@ -27,15 +28,22 @@ const ContactPopup: React.FC<ContactPopupProps> = ({ isOpen, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        // Check if already submitted
-        const isSubmitted = localStorage.getItem('yosa_lead_submitted');
-        if (!isSubmitted) {
-            // Show popup if not submitted, even if parent closed it (persistence logic)
-            const timer = setTimeout(() => {
-                setIsVisible(true);
-            }, 2000);
-            return () => clearTimeout(timer);
-        }
+        // Never show to logged-in users
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                setIsVisible(false);
+                return;
+            }
+            // Check if already submitted
+            const isSubmitted = localStorage.getItem('yosa_lead_submitted');
+            if (!isSubmitted) {
+                const timer = setTimeout(() => {
+                    setIsVisible(true);
+                }, 2000);
+                return () => clearTimeout(timer);
+            }
+        });
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
